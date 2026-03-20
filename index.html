@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZTRATAX – Permainan Kartu Strategi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0b0b14; --surface:#13131f; --surface2:#1c1c2e;
+  --border:#252538; --gold:#c9a84c; --gold-dim:#6a5820;
+  --accent:#e8c96a; --text:#e8e4d8; --muted:#6a6660;
+  --green:#3ecf8e; --red:#e05c5c;
+  /* Card brand colors from prototype */
+  --lc1:#a0a0a0; --lc2:#1a5fc8; --lc3:#f0a830;
+  --lc4:#0ec060; --lc5:#5533dd; --lc6:#cc1111; --lc7:#111111;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;overflow-x:hidden;}
+.screen{display:none;}
+.screen.active{display:flex;}
+
+/* ─── TITLE ─── */
+#title-screen{
+  flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:2rem;text-align:center;
+  background:radial-gradient(ellipse at 25% 25%,rgba(201,168,76,.1) 0%,transparent 55%),
+             radial-gradient(ellipse at 75% 75%,rgba(85,51,221,.08) 0%,transparent 55%),var(--bg);
+}
+.t-logo{font-size:2.2rem;margin-bottom:.5rem;filter:drop-shadow(0 0 18px rgba(201,168,76,.45));}
+#title-screen h1{
+  font-family:'Cinzel Decorative',cursive;font-size:clamp(2.6rem,8vw,5rem);
+  color:var(--gold);letter-spacing:.12em;
+  text-shadow:0 0 45px rgba(201,168,76,.3),0 2px 0 rgba(0,0,0,.8);line-height:1;
+}
+.t-sub{font-family:'Cinzel',serif;font-size:.82rem;color:var(--muted);letter-spacing:.35em;margin:.6rem 0 2rem;text-transform:uppercase;}
+.t-divider{width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:1.1rem auto;}
+.btn-prim{
+  font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.15em;color:#0b0b14;
+  background:linear-gradient(135deg,#e8c96a,#a07830,#c9a84c);border:none;
+  padding:.9rem 3rem;border-radius:4px;cursor:pointer;transition:all .25s;text-transform:uppercase;
+  box-shadow:0 4px 25px rgba(201,168,76,.32);
+}
+.btn-prim:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,.48);}
+.btn-sec{
+  font-family:'Cinzel',serif;font-size:.83rem;letter-spacing:.12em;color:var(--muted);
+  background:transparent;border:1px solid var(--border);padding:.6rem 1.8rem;border-radius:4px;
+  cursor:pointer;transition:all .25s;text-transform:uppercase;margin-top:.6rem;
+}
+.btn-sec:hover{border-color:var(--gold-dim);color:var(--gold);}
+
+/* ── prototype card preview row ── */
+.t-cards{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.4rem 0;}
+
+/* ─── RULES ─── */
+#rules-screen{flex-direction:column;min-height:100vh;padding:2rem;max-width:680px;margin:0 auto;overflow-y:auto;}
+#rules-screen h2{font-family:'Cinzel Decorative',cursive;font-size:1.5rem;color:var(--gold);margin-bottom:1.4rem;text-align:center;}
+.rs{margin-bottom:1.3rem;}
+.rs h3{font-family:'Cinzel',serif;font-size:.88rem;color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:.3rem;margin-bottom:.6rem;letter-spacing:.1em;}
+.rs p,.rs li{font-size:.84rem;color:var(--muted);line-height:1.8;}
+.rs ul{padding-left:1.2rem;}
+.rtbl{width:100%;border-collapse:collapse;margin-top:.4rem;}
+.rtbl th,.rtbl td{text-align:left;padding:.42rem .55rem;font-size:.77rem;border-bottom:1px solid var(--border);}
+.rtbl th{font-family:'Cinzel',serif;color:var(--gold);letter-spacing:.08em;}
+.rtbl td{color:var(--muted);}
+
+/* ─── GAME ─── */
+#game-screen{flex-direction:column;min-height:100vh;
+  background:radial-gradient(ellipse at 50% -10%,rgba(201,168,76,.06) 0%,transparent 50%),var(--bg);}
+.g-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.52rem .95rem;background:var(--surface);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10;
+}
+.g-header h2{font-family:'Cinzel Decorative',cursive;font-size:.82rem;color:var(--gold);letter-spacing:.08em;}
+.deck-info{font-family:'Cinzel',serif;font-size:.78rem;color:var(--muted);}
+.deck-info b{color:var(--accent);}
+.btn-icon{background:transparent;border:1px solid var(--border);color:var(--muted);
+  padding:.28rem .62rem;border-radius:4px;cursor:pointer;font-size:.73rem;font-family:'Cinzel',serif;transition:all .2s;}
+.btn-icon:hover{border-color:var(--gold-dim);color:var(--gold);}
+.g-body{flex:1;display:flex;flex-direction:column;gap:.75rem;padding:.75rem;max-width:880px;margin:0 auto;width:100%;}
+.p-zone{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem;transition:border-color .3s,box-shadow .3s;}
+.p-zone.active-zone{border-color:rgba(201,168,76,.38);box-shadow:0 0 20px rgba(201,168,76,.06);}
+.zlabel{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem;}
+.zscore{margin-left:auto;background:var(--border);border-radius:20px;padding:.16rem .62rem;font-size:.76rem;color:var(--accent);}
+.card-row{display:flex;gap:.55rem;flex-wrap:wrap;min-height:112px;align-items:center;}
+
+/* ════════════════════════════════
+   PROTO CARD — faithful to design
+   ════════════════════════════════ */
+.card-wrap{
+  perspective:700px;width:80px;height:112px;flex-shrink:0;
+  transition:transform .2s;position:relative;
+}
+.card-inner{
+  width:100%;height:100%;position:relative;
+  transform-style:preserve-3d;
+  transition:transform .52s cubic-bezier(.4,0,.2,1);
+}
+.card-wrap.hidden .card-inner{transform:rotateY(180deg);}
+
+.card-face,.card-back{
+  position:absolute;inset:0;border-radius:6px;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+/* ── FRONT: white card with colored border, symbol, corner dots ── */
+.card-face{
+  background:#ffffff;
+  cursor:pointer;
+  transition:box-shadow .18s;
+  overflow:hidden;
+}
+/* border is drawn as box-shadow inset + outline */
+.card-face .cf-border{
+  position:absolute;inset:3px;border-radius:3px;border:3px solid var(--cc);
+  pointer-events:none;z-index:1;
+}
+/* corner dots */
+.card-face .dot{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  background:var(--cc);z-index:2;
+}
+.card-face .dot.tl{top:-1px;left:-1px;}
+.card-face .dot.br{bottom:-1px;right:-1px;}
+/* symbol container */
+.cf-sym{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1;
+}
+/* level label bottom */
+.cf-lv{
+  position:absolute;bottom:5px;left:0;right:0;text-align:center;
+  font-family:'Cinzel',serif;font-size:.5rem;font-weight:700;
+  color:var(--cc);z-index:2;letter-spacing:.05em;
+}
+/* name top */
+.cf-nm{
+  position:absolute;top:6px;left:0;right:0;text-align:center;
+  font-family:'Cinzel',serif;font-size:.42rem;
+  color:var(--cc);z-index:2;letter-spacing:.03em;opacity:.7;
+}
+
+/* locked overlay */
+.card-wrap.locked .card-face::after{
+  content:'🔒';position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;background:rgba(255,255,255,.72);z-index:5;
+  border-radius:6px;pointer-events:none;
+}
+
+/* BACK: dark ornate */
+.card-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(140deg,#10102a 0%,#1a1a3e 50%,#0c0c1e 100%);
+  border:2px solid var(--gold-dim);border-radius:6px;
+}
+.card-back::before{content:'';position:absolute;inset:5px;border:1px solid rgba(201,168,76,.2);border-radius:3px;
+  background:repeating-linear-gradient(45deg,transparent,transparent 5px,rgba(201,168,76,.022) 5px,rgba(201,168,76,.022) 6px);}
+.card-back-z{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Cinzel Decorative',cursive;font-size:1.1rem;color:rgba(201,168,76,.15);letter-spacing:.05em;}
+
+/* hover / selected states */
+.card-wrap:not(.locked):not(.no-hover):hover{transform:translateY(-9px);}
+.card-wrap.selected{transform:translateY(-13px);}
+.card-wrap.selected .card-face{box-shadow:0 0 0 2px #fff,0 0 18px rgba(201,168,76,.7);}
+
+/* drag */
+.card-wrap.dragging{opacity:.42;transform:scale(.91);}
+.card-wrap.drag-over .card-face{box-shadow:0 0 0 2.5px #3ecf8e,0 0 14px rgba(62,207,142,.45)!important;}
+
+/* deal animation */
+@keyframes dealIn{from{opacity:0;transform:translateY(22px) scale(.88)}to{opacity:1;transform:none}}
+.card-wrap{animation:dealIn .32s ease both;}
+
+/* ── SVG symbols ── */
+svg.sym{display:block;}
+
+/* mid */
+.mid-zone{display:flex;align-items:center;justify-content:center;gap:2.5rem;padding:.25rem 0;}
+.deck-pile{
+  width:80px;height:112px;border-radius:6px;
+  background:linear-gradient(135deg,#10102a,#0c0c1e);
+  border:2px solid var(--gold-dim);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;position:relative;
+}
+.deck-pile::before{content:'';position:absolute;inset:5px;border:1px solid rgba(201,168,76,.18);border-radius:3px;}
+.deck-pile:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 6px 20px rgba(201,168,76,.18);}
+.dp-icon{font-size:1.5rem;color:rgba(201,168,76,.4);}
+.dp-count{font-family:'Cinzel',serif;font-size:.7rem;color:var(--gold);margin-top:.18rem;}
+
+/* action */
+.a-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem;}
+.turn-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;}
+.tdot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.28;transform:scale(.62)}}
+.ttxt{font-family:'Cinzel',serif;font-size:.8rem;color:var(--gold);}
+.ppill{margin-left:auto;font-family:'Cinzel',serif;font-size:.66rem;background:var(--border);border-radius:20px;padding:.16rem .62rem;letter-spacing:.07em;color:var(--accent);}
+.ppill.eff{color:var(--green);}
+.a-btns{display:flex;gap:.5rem;flex-wrap:wrap;}
+.btn-a{font-family:'Cinzel',serif;font-size:.73rem;letter-spacing:.08em;padding:.52rem 1.05rem;border-radius:6px;cursor:pointer;border:none;transition:all .2s;text-transform:uppercase;}
+.btn-a.gold{background:linear-gradient(135deg,var(--gold),#7a5020);color:#0b0b14;}
+.btn-a.gold:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(201,168,76,.38);}
+.btn-a.dim{background:var(--border);color:var(--muted);}
+.btn-a.dim:hover{background:#2e2e44;color:var(--text);}
+.btn-a:disabled{opacity:.26;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+#glog{background:rgba(0,0,0,.32);border:1px solid var(--border);border-radius:7px;padding:.55rem .7rem;max-height:76px;overflow-y:auto;font-size:.73rem;color:var(--muted);line-height:1.6;margin-top:.65rem;}
+.le{padding:.06rem 0;border-bottom:1px solid rgba(255,255,255,.02);}
+.le.imp{color:var(--accent);}
+.le.bad{color:var(--red);}
+.le.good{color:var(--green);}
+
+/* ─── RESULT ─── */
+#result-screen{
+  flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;
+  background:radial-gradient(ellipse at 50% 30%,rgba(201,168,76,.11) 0%,transparent 60%),var(--bg);
+}
+#result-screen h2{font-family:'Cinzel Decorative',cursive;font-size:clamp(1.7rem,5vw,3rem);color:var(--gold);margin-bottom:.4rem;}
+.r-detail{font-family:'Cinzel',serif;font-size:.88rem;color:var(--muted);margin-bottom:1.7rem;line-height:1.9;white-space:pre-line;}
+.r-players{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.8rem;}
+.r-player{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;min-width:165px;}
+.r-player.win{border-color:var(--gold);box-shadow:0 0 26px rgba(201,168,76,.2);}
+.r-player h3{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.15em;color:var(--muted);margin-bottom:.55rem;text-transform:uppercase;}
+.r-score{font-family:'Cinzel Decorative',cursive;font-size:2rem;color:var(--gold);}
+.r-3cards{display:flex;gap:.32rem;margin-top:.55rem;justify-content:center;}
+.r-pip{border-radius:5px;padding:.22rem .42rem;font-size:.68rem;font-family:'Cinzel',serif;}
+
+/* ─── MODAL ─── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--gold-dim);border-radius:12px;padding:1.4rem;max-width:460px;width:100%;text-align:center;max-height:90vh;overflow-y:auto;}
+.modal h3{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);margin-bottom:.4rem;letter-spacing:.1em;}
+.modal p{font-size:.86rem;color:var(--muted);line-height:1.65;margin-bottom:.8rem;white-space:pre-line;}
+.m-cards{display:flex;gap:.42rem;flex-wrap:wrap;justify-content:center;margin-bottom:.85rem;}
+.m-btns{display:flex;gap:.45rem;justify-content:center;flex-wrap:wrap;}
+
+/* sudden death */
+.sd-row{display:flex;gap:1.4rem;align-items:center;justify-content:center;margin-bottom:.9rem;}
+.sd-lbl{font-family:'Cinzel',serif;font-size:.68rem;color:var(--muted);margin-bottom:.28rem;text-align:center;display:block;}
+@keyframes cardReveal{from{transform:rotateY(90deg);opacity:0}to{transform:rotateY(0);opacity:1}}
+.sd-card-wrap{animation:cardReveal .48s ease;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<!-- ════ TITLE ════ -->
+<div id="title-screen" class="screen active">
+  <div class="t-logo">⚔</div>
+  <h1>ZTRATAX</h1>
+  <p class="t-sub">Permainan Kartu Strategi</p>
+  <div class="t-divider"></div>
+  <div class="t-cards" id="t-cards"></div>
+  <div class="t-divider"></div>
+  <button class="btn-prim" onclick="startGame()">▶ Mulai Bermain</button>
+  <button class="btn-sec" onclick="show('rules-screen')">📜 Cara Bermain</button>
+</div>
+
+<!-- ════ RULES ════ -->
+<div id="rules-screen" class="screen">
+  <h2>📜 Cara Bermain</h2>
+  <div class="rs"><h3>Tujuan</h3><p>Kumpulkan <strong>3 kartu terbaik</strong> dengan total poin tertinggi saat deck habis. Maksimum <strong>19 poin</strong> (6+6+7).</p></div>
+  <div class="rs"><h3>Setup</h3><p>50 kartu dikocok → tiap pemain dapat <strong>4 kartu tertutup</strong> → sisa jadi deck tengah (42 kartu).</p></div>
+  <div class="rs"><h3>Urutan Giliran</h3><ul>
+    <li><strong>1. Ambil Kartu</strong> dari deck (wajib).</li>
+    <li><strong>2. Pakai Efek</strong> dari 1 kartu Level 2–7 (opsional) → kartu kembali ke tangan.</li>
+    <li><strong>3. PASS EFEK</strong> bila tidak mau pakai efek.</li>
+  </ul></div>
+  <div class="rs"><h3>Level & Efek</h3>
+  <table class="rtbl">
+    <tr><th>Lv</th><th>Simbol</th><th>Nama</th><th>Jml</th><th>Efek</th></tr>
+    <tr><td>1</td><td style="color:#a0a0a0">⬜</td><td>Bidak</td><td>16</td><td>Nihil</td></tr>
+    <tr><td>2</td><td style="color:#1a5fc8">⬤</td><td>Perunding</td><td>12</td><td><b>Minor Swap</b> – tukar 1 kartu buta</td></tr>
+    <tr><td>3</td><td style="color:#f0a830">▲</td><td>Figur</td><td>8</td><td><b>Intip</b> – lihat 1 kartu lawan</td></tr>
+    <tr><td>4</td><td style="color:#0ec060">■</td><td>Pengelola</td><td>6</td><td><b>Skip</b> – lawan lewat 1 giliran</td></tr>
+    <tr><td>5</td><td style="color:#5533dd">⬠</td><td>Konglomerat</td><td>4</td><td><b>Major Swap</b> – lihat semua kartu lawan, pilih 1</td></tr>
+    <tr><td>6</td><td style="color:#cc1111">✶</td><td>Maestro</td><td>3</td><td><b>Kunci</b> – kunci 1 kartumu aman</td></tr>
+    <tr><td>7</td><td style="color:#333">⬡</td><td>Tak Tersentuh</td><td>1</td><td><b>Reset</b> – kocok ulang kartu lawan (sekali)</td></tr>
+  </table></div>
+  <div class="rs"><h3>Tips</h3><ul>
+    <li>Seret kartu di tanganmu untuk mengatur urutan.</li>
+    <li>Klik kartu → klik <em>Gunakan Efek</em> untuk mengaktifkan kemampuannya.</li>
+    <li>Kunci kartu level tinggi sebelum lawan sempat mencurinya!</li>
+  </ul></div>
+  <button class="btn-prim" onclick="show('title-screen')" style="margin-top:1rem;align-self:center">← Kembali</button>
+</div>
+
+<!-- ════ GAME ════ -->
+<div id="game-screen" class="screen">
+  <div class="g-header">
+    <h2>⚔ ZTRATAX</h2>
+    <div class="deck-info">Deck: <b id="dn">42</b> kartu</div>
+    <button class="btn-icon" onclick="show('title-screen')">✕ Menu</button>
+  </div>
+  <div class="g-body">
+    <div class="p-zone" id="ai-zone">
+      <div class="zlabel">🤖 AI <span class="zscore" id="ai-sc">? poin</span></div>
+      <div class="card-row" id="ai-cards"></div>
+    </div>
+    <div class="mid-zone">
+      <div class="deck-pile" id="deck-pile" onclick="playerDraw()">
+        <div class="dp-icon">🂠</div>
+        <div class="dp-count" id="dp-num">42</div>
+      </div>
+    </div>
+    <div class="a-panel">
+      <div class="turn-row">
+        <div class="tdot"></div>
+        <div class="ttxt" id="ttxt">Giliranmu</div>
+        <div class="ppill" id="ppill">Ambil Kartu</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn-a gold" id="btn-draw" onclick="playerDraw()">🂠 Ambil Kartu</button>
+        <button class="btn-a dim"  id="btn-eff"  onclick="playerUseEffect()" disabled>✨ Gunakan Efek</button>
+        <button class="btn-a dim"  id="btn-pass" onclick="playerPass()" disabled>⏭ Pass Efek</button>
+      </div>
+      <div id="glog"></div>
+    </div>
+    <div class="p-zone" id="player-zone">
+      <div class="zlabel">🧑 Kamu <span class="zscore" id="pl-sc">? poin</span></div>
+      <div class="card-row" id="player-cards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESULT ════ -->
+<div id="result-screen" class="screen">
+  <div id="r-crown" style="font-size:2rem;margin-bottom:.4rem"></div>
+  <h2 id="r-title"></h2>
+  <p class="r-detail" id="r-detail"></p>
+  <div class="r-players" id="r-players"></div>
+  <button class="btn-prim" onclick="startGame()">🔄 Main Lagi</button>
+  <button class="btn-sec" onclick="show('title-screen')" style="margin-top:.5rem">← Menu</button>
+</div>
+
+<!-- ════ MODAL ════ -->
+<div class="overlay" id="ovl">
+  <div class="modal">
+    <h3 id="m-title">–</h3>
+    <p  id="m-body">–</p>
+    <div class="m-cards" id="m-cards"></div>
+    <div class="m-btns"  id="m-btns"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════
+// CARD DATA  — exact proto specs
+// ══════════════════════════════
+const LV = [null,
+  // lv, name, pts, cnt, eff, border/dot color, symbol SVG function
+  {lv:1, name:'Bidak',         pts:1, cnt:16, eff:null,    col:'#a0a0a0'},
+  {lv:2, name:'Perunding',     pts:2, cnt:12, eff:'minor', col:'#1a5fc8'},
+  {lv:3, name:'Figur',         pts:3, cnt:8,  eff:'intip', col:'#f0a830'},
+  {lv:4, name:'Pengelola',     pts:4, cnt:6,  eff:'skip',  col:'#0ec060'},
+  {lv:5, name:'Konglomerat',   pts:5, cnt:4,  eff:'major', col:'#5533dd'},
+  {lv:6, name:'Maestro',       pts:6, cnt:3,  eff:'lock',  col:'#cc1111'},
+  {lv:7, name:'Tak Tersentuh', pts:7, cnt:1,  eff:'reset', col:'#111111'},
+];
+
+// Build SVG symbol for each level, faithful to prototype
+function makeSym(lv, size=38) {
+  const c = LV[lv].col;
+  switch(lv) {
+    case 1: // rounded rectangle (pill shape)
+      return `<svg class="sym" width="${size}" height="${size*1.25}" viewBox="0 0 38 48">
+        <rect x="7" y="5" width="24" height="38" rx="8" ry="8" fill="${c}"/>
+      </svg>`;
+    case 2: // circle
+      return `<svg class="sym" width="${size}" height="${size}" viewBox="0 0 38 38">
+        <circle cx="19" cy="19" r="15" fill="${c}"/>
+      </svg>`;
+    case 3: // triangle
+      return `<svg class="sym" width="${size}" height="${size*0.9}" viewBox="0 0 38 34">
+        <polygon points="19,3 36,31 2,31" fill="${c}"/>
+      </svg>`;
+    case 4: // square
+      return `<svg class="sym" width="${size}" height="${size}" viewBox="0 0 38 38">
+        <rect x="7" y="7" width="24" height="24" fill="${c}"/>
+      </svg>`;
+    case 5: // pentagon
+      return `<svg class="sym" width="${size}" height="${size}" viewBox="0 0 38 38">
+        <polygon points="19,3 35,14 29,32 9,32 3,14" fill="${c}"/>
+      </svg>`;
+    case 6: // 6-pointed star (hexagram-ish, from photo looks like 6-pt star)
+      return `<svg class="sym" width="${size}" height="${size}" viewBox="0 0 38 38">
+        <polygon points="19,2 23,14 36,14 26,22 30,35 19,28 8,35 12,22 2,14 15,14" fill="${c}"/>
+      </svg>`;
+    case 7: // heptagon
+      return `<svg class="sym" width="${size}" height="${size}" viewBox="0 0 38 38">
+        <polygon points="19,2 33,9 37,24 28,36 10,36 1,24 5,9" fill="${c}"/>
+      </svg>`;
+  }
+}
+
+// Build a full proto card DOM element
+function buildProtoCard(lv) {
+  const d = LV[lv];
+  const wrap = document.createElement('div');
+  wrap.className = 'card-face';
+  wrap.style.setProperty('--cc', d.col);
+  wrap.style.cssText += `--cc:${d.col};`;
+  // border frame
+  const border = document.createElement('div');
+  border.className = 'cf-border';
+  border.style.borderColor = d.col;
+  // corner dots
+  const dotTL = document.createElement('div');
+  dotTL.className = 'dot tl'; dotTL.style.background = d.col;
+  const dotBR = document.createElement('div');
+  dotBR.className = 'dot br'; dotBR.style.background = d.col;
+  // symbol
+  const sym = document.createElement('div');
+  sym.className = 'cf-sym';
+  sym.innerHTML = makeSym(lv);
+  // level label
+  const lvLabel = document.createElement('div');
+  lvLabel.className = 'cf-lv';
+  lvLabel.style.color = d.col;
+  lvLabel.textContent = `Lv${lv} · ${d.pts}p`;
+  // name
+  const nm = document.createElement('div');
+  nm.className = 'cf-nm';
+  nm.style.color = d.col;
+  nm.textContent = d.name;
+  wrap.appendChild(border);
+  wrap.appendChild(dotTL);
+  wrap.appendChild(dotBR);
+  wrap.appendChild(sym);
+  wrap.appendChild(lvLabel);
+  wrap.appendChild(nm);
+  return wrap;
+}
+
+// Title preview
+(function(){
+  const c = document.getElementById('t-cards');
+  for(let lv=1;lv<=7;lv++){
+    const outer = document.createElement('div');
+    outer.style.cssText = 'width:50px;height:70px;border-radius:5px;overflow:hidden;cursor:default;transition:transform .2s;flex-shrink:0;';
+    outer.onmouseenter = ()=>{ outer.style.transform='translateY(-8px) rotate(-3deg)'; };
+    outer.onmouseleave = ()=>{ outer.style.transform='none'; };
+    const face = buildProtoCard(lv);
+    face.style.position='static';face.style.borderRadius='5px';
+    face.style.width='50px';face.style.height='70px';
+    outer.appendChild(face);
+    c.appendChild(outer);
+  }
+})();
+
+// ══════════════════════════════
+// GAME STATE
+// ══════════════════════════════
+let uid=0, S={};
+function mkCard(lv){return{id:uid++,lv,locked:false,faceUp:false,resetUsed:false};}
+function buildDeck(){
+  const d=[];
+  for(let lv=1;lv<=7;lv++) for(let i=0;i<LV[lv].cnt;i++) d.push(mkCard(lv));
+  return shuffle(d);
+}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
+function bestScore(h){if(!h.length)return 0;return[...h].sort((a,b)=>b.lv-a.lv).slice(0,3).reduce((s,c)=>s+c.lv,0);}
+function bestCards(h){return[...h].sort((a,b)=>b.lv-a.lv).slice(0,3);}
+function topLv(h){return h.reduce((m,c)=>c.lv>m?c.lv:m,0);}
+
+// ══════════════════════════════
+// SCREENS
+// ══════════════════════════════
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ══════════════════════════════
+// START
+// ══════════════════════════════
+function startGame(){
+  uid=0;
+  const deck=buildDeck();
+  S={deck,
+    player:{hand:[],skipped:false},
+    ai:{hand:[],skipped:false},
+    turn:'player',phase:'draw',sel:null,
+    gameOver:false,resetUsed:false,aiThinking:false
+  };
+  for(let i=0;i<4;i++){
+    const pc=S.deck.pop();pc.faceUp=true;S.player.hand.push(pc);
+    S.ai.hand.push(S.deck.pop());
+  }
+  show('game-screen');clearLog();
+  log('Permainan dimulai! Ambil kartu untuk memulai giliranmu.','imp');
+  render();
+}
+
+// ══════════════════════════════
+// RENDER
+// ══════════════════════════════
+function render(){
+  if(!S) return;
+  renderZone('player-cards',S.player.hand,true);
+  renderZone('ai-cards',S.ai.hand,false);
+  document.getElementById('dn').textContent=S.deck.length;
+  document.getElementById('dp-num').textContent=S.deck.length;
+  document.getElementById('pl-sc').textContent=bestScore(S.player.hand)+' poin';
+  document.getElementById('ai-sc').textContent='? poin';
+
+  const isP=S.turn==='player'&&!S.gameOver&&!S.aiThinking;
+  const inD=S.phase==='draw', inE=S.phase==='effect';
+  const hasSel=!!S.sel&&S.player.hand.some(c=>c.id===S.sel.id);
+  const hasEff=hasSel&&!S.sel.locked&&LV[S.sel.lv].eff;
+
+  document.getElementById('ttxt').textContent=isP?'Giliranmu':'Giliran AI...';
+  const pp=document.getElementById('ppill');
+  pp.textContent=inD?'Ambil Kartu':'Pakai / Pass Efek';
+  pp.className='ppill'+(inE?' eff':'');
+
+  document.getElementById('btn-draw').disabled=!isP||!inD||S.deck.length===0;
+  document.getElementById('btn-eff').disabled=!isP||!inE||!hasEff;
+  document.getElementById('btn-pass').disabled=!isP||!inE;
+
+  document.getElementById('deck-pile').style.opacity=S.deck.length===0?'.3':'1';
+  document.getElementById('ai-zone').classList.toggle('active-zone',S.turn==='ai');
+  document.getElementById('player-zone').classList.toggle('active-zone',S.turn==='player');
+}
+
+function renderZone(cid, hand, isPlayer){
+  const el=document.getElementById(cid);
+  el.innerHTML='';
+  hand.forEach((card,idx)=>{
+    // Outer wrap
+    const wrap=document.createElement('div');
+    wrap.className='card-wrap'
+      +(card.locked?' locked':'')
+      +(S.sel&&S.sel.id===card.id?' selected':'')
+      +(!isPlayer&&!card.faceUp?' hidden':'');
+    wrap.style.animationDelay=idx*.05+'s';
+    wrap.dataset.id=card.id;
+
+    const inner=document.createElement('div');
+    inner.className='card-inner';
+
+    // FRONT: proto card
+    const face=buildProtoCard(card.lv);
+    if(isPlayer&&!card.locked){
+      face.style.cursor='pointer';
+      face.addEventListener('click',()=>selectCard(card));
+    }
+
+    // BACK
+    const back=document.createElement('div');
+    back.className='card-back';
+    back.innerHTML='<div class="card-back-z">ZTRATAX</div>';
+
+    inner.appendChild(face);
+    inner.appendChild(back);
+    wrap.appendChild(inner);
+
+    // Drag to reorder (player only)
+    if(isPlayer){
+      wrap.draggable=true;
+      wrap.addEventListener('dragstart',e=>{
+        e.dataTransfer.setData('cid',card.id);
+        setTimeout(()=>wrap.classList.add('dragging'),0);
+      });
+      wrap.addEventListener('dragend',()=>wrap.classList.remove('dragging'));
+      wrap.addEventListener('dragover',e=>{e.preventDefault();wrap.classList.add('drag-over');});
+      wrap.addEventListener('dragleave',()=>wrap.classList.remove('drag-over'));
+      wrap.addEventListener('drop',e=>{
+        e.preventDefault();wrap.classList.remove('drag-over');
+        const fid=parseInt(e.dataTransfer.getData('cid'));
+        if(fid===card.id)return;
+        const fi=S.player.hand.findIndex(c=>c.id===fid);
+        const ti=S.player.hand.findIndex(c=>c.id===card.id);
+        if(fi>=0&&ti>=0){[S.player.hand[fi],S.player.hand[ti]]=[S.player.hand[ti],S.player.hand[fi]];render();}
+      });
+    }
+    el.appendChild(wrap);
+  });
+}
+
+// ══════════════════════════════
+// ACTIONS
+// ══════════════════════════════
+function selectCard(card){
+  if(S.turn!=='player'||S.gameOver)return;
+  S.sel=(S.sel?.id===card.id)?null:card;
+  render();
+}
+function playerDraw(){
+  if(S.turn!=='player'||S.phase!=='draw'||S.gameOver)return;
+  if(S.deck.length===0){endGame();return;}
+  const d=S.deck.pop();d.faceUp=true;S.player.hand.push(d);
+  log(`Kamu mengambil Lv${d.lv} ${LV[d.lv].name} (${d.lv}p)`);
+  if(S.deck.length===0){log('⚠ Deck habis!','bad');S.phase='effect';S.sel=null;render();setTimeout(endGame,600);return;}
+  S.phase='effect';S.sel=null;render();
+}
+function playerPass(){if(S.turn!=='player'||S.phase!=='effect')return;log('Kamu pass efek.');S.sel=null;endPlayerTurn();}
+function playerUseEffect(){
+  if(!S.sel||S.turn!=='player'||S.phase!=='effect')return;
+  const c=S.sel;
+  if(!LV[c.lv].eff||c.locked){log('Kartu ini tidak punya efek aktif.','bad');return;}
+  if(LV[c.lv].eff==='reset'&&(c.resetUsed||S.resetUsed)){log('⬢ Reset sudah digunakan!','bad');return;}
+  ({minor:effMinor,intip:effIntip,skip:effSkip,major:effMajor,lock:effLock,reset:effReset})[LV[c.lv].eff]();
+}
+
+// ── Effects ──
+function effMinor(){
+  const opts=S.player.hand.filter(c=>c.id!==S.sel.id&&!c.locked);
+  const aiU=S.ai.hand.filter(c=>!c.locked);
+  if(!opts.length||!aiU.length){log('Tidak ada kartu yang bisa ditukar.','bad');return;}
+  openModal('🔵 Minor Swap','Pilih kartumu yang ingin ditukar.\n(AI memilih kartunya secara acak dan tertutup.)',
+    opts.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
+      cb:()=>{
+        const ai=aiU[0|Math.random()*aiU.length];
+        const pi=S.player.hand.indexOf(c),aii=S.ai.hand.indexOf(ai);
+        S.player.hand[pi]=ai;ai.faceUp=true;
+        S.ai.hand[aii]=c;c.faceUp=false;
+        log(`✅ Minor Swap selesai.`,'good');closeModal();doneEffect();
+      }
+    }))
+  );
+}
+function effIntip(){
+  const aiU=S.ai.hand.filter(c=>!c.locked);
+  if(!aiU.length){log('Semua kartu AI terkunci.','bad');return;}
+  const t=aiU[0|Math.random()*aiU.length];
+  openModal('⚠️ Intip',`Kamu mengintip 1 kartu AI (ditunjukkan ke semua pemain)!`,
+    [{label:`Lv${t.lv} ${LV[t.lv].name} — ${t.lv}p`,card:t,
+      cb:()=>{log(`👁 Intip: kartu AI adalah Lv${t.lv} ${LV[t.lv].name} (${t.lv}p)`,'good');closeModal();doneEffect();}
+    }]
+  );
+}
+function effSkip(){
+  S.ai.skipped=true;
+  log('⏭ Skip: AI kehilangan giliran berikutnya!','good');
+  if(S.deck.length>0){
+    const e=S.deck.pop();e.faceUp=true;S.player.hand.push(e);
+    log(`Bonus kartu ekstra: Lv${e.lv} ${LV[e.lv].name}`,'good');
+  }
+  doneEffect();
+}
+function effMajor(){
+  const aiU=S.ai.hand.filter(c=>!c.locked);
+  if(!aiU.length){log('Semua kartu AI terkunci — efek gagal.','bad');return;}
+  const selEff=S.sel;
+  openModal('💎 Major Swap',
+    'Semua kartu AI terbuka! Pilih 1 yang ingin kamu ambil.\n(Kamu memberikan kartu terendahmu sebagai ganti.)',
+    aiU.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
+      cb:()=>{
+        const give=S.player.hand.filter(x=>x.id!==selEff.id&&!x.locked).sort((a,b)=>a.lv-b.lv)[0];
+        if(!give){log('Tidak ada kartu yang bisa diberikan.','bad');closeModal();return;}
+        const pi=S.player.hand.indexOf(give),aii=S.ai.hand.indexOf(c);
+        S.player.hand[pi]=c;c.faceUp=true;S.ai.hand[aii]=give;give.faceUp=false;
+        log(`✅ Major Swap: dapat Lv${c.lv} ${LV[c.lv].name}`,'good');closeModal();doneEffect();
+      }
+    }))
+  );
+}
+function effLock(){
+  const opts=S.player.hand.filter(c=>!c.locked);
+  openModal('💥 Kunci','Pilih kartu yang ingin dikunci hingga akhir permainan.',
+    opts.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
+      cb:()=>{c.locked=true;log(`🔒 Lv${c.lv} ${LV[c.lv].name} dikunci!`,'good');closeModal();doneEffect();}
+    }))
+  );
+}
+function effReset(){
+  const card=S.sel;
+  const aiU=S.ai.hand.filter(c=>!c.locked);
+  openModal('⬢ Reset',
+    `Semua ${aiU.length} kartu AI yang tidak terkunci akan dikocok ulang.\nEfek ini hanya bisa dipakai SEKALI per permainan!`,
+    [
+      {label:'💥 Aktifkan Reset!',cb:()=>{
+        const locked=S.ai.hand.filter(c=>c.locked);
+        aiU.forEach(c=>{c.faceUp=false;S.deck.push(c);});
+        S.deck=shuffle(S.deck);
+        const nc=[];for(let i=0;i<aiU.length&&S.deck.length>0;i++) nc.push(S.deck.pop());
+        S.ai.hand=[...locked,...nc];
+        S.resetUsed=true;card.resetUsed=true;
+        log(`⬢ Reset! ${aiU.length} kartu AI dikocok ulang.`,'good');
+        closeModal();doneEffect();
+      }},
+      {label:'Batal',cb:closeModal}
+    ]
+  );
+}
+function doneEffect(){S.sel=null;endPlayerTurn();}
+function endPlayerTurn(){S.phase='draw';S.turn='ai';S.sel=null;render();setTimeout(aiTurn,1100);}
+
+// ══════════════════════════════
+// AI TURN
+// ══════════════════════════════
+function aiTurn(){
+  if(S.gameOver)return;
+  S.aiThinking=true;render();
+  if(S.ai.skipped){S.ai.skipped=false;log('⏭ AI kehilangan giliran (Skip).','bad');S.aiThinking=false;S.turn='player';render();return;}
+  if(S.deck.length===0){endGame();return;}
+  const d=S.deck.pop();S.ai.hand.push(d);
+  log('AI mengambil kartu.');
+  if(S.deck.length===0){log('⚠ Deck habis!','bad');S.aiThinking=false;render();setTimeout(endGame,400);return;}
+  setTimeout(aiEffect,900);
+}
+function aiEffect(){
+  const eff=S.ai.hand.filter(c=>LV[c.lv].eff&&!c.locked);
+  if(!eff.length){log('AI pass efek.');aiDone();return;}
+  const myScore=bestScore(S.ai.hand);
+  const plScore=bestScore(S.player.hand);
+  const myBestU=S.ai.hand.filter(c=>!c.locked).sort((a,b)=>b.lv-a.lv)[0]||{lv:0};
+  const hasLock=eff.find(c=>LV[c.lv].eff==='lock');
+  const hasReset=eff.find(c=>LV[c.lv].eff==='reset'&&!c.resetUsed&&!S.resetUsed);
+  const hasMajor=eff.find(c=>LV[c.lv].eff==='major');
+  const hasSkip=eff.find(c=>LV[c.lv].eff==='skip');
+  const hasMinor=eff.find(c=>LV[c.lv].eff==='minor');
+
+  if(hasLock&&myBestU.lv>=5&&Math.random()>.2){myBestU.locked=true;log(`AI mengunci kartu Lv${myBestU.lv}!`,'bad');aiDone();return;}
+  if(hasReset&&plScore>myScore+2){
+    const locked=S.player.hand.filter(c=>c.locked);
+    const toRet=S.player.hand.filter(c=>!c.locked);
+    toRet.forEach(c=>{c.faceUp=true;S.deck.push(c);});
+    S.deck=shuffle(S.deck);
+    const nc=[];for(let i=0;i<toRet.length&&S.deck.length>0;i++){const x=S.deck.pop();x.faceUp=true;nc.push(x);}
+    S.player.hand=[...locked,...nc];
+    S.resetUsed=true;hasReset.resetUsed=true;
+    log('AI memakai Reset! Kartu kamu dikocok ulang.','bad');aiDone();return;
+  }
+  if(hasMajor){
+    const plU=S.player.hand.filter(c=>!c.locked).sort((a,b)=>b.lv-a.lv);
+    const plBest=plU[0];
+    const myWorst=S.ai.hand.filter(c=>!c.locked&&c.id!==hasMajor.id).sort((a,b)=>a.lv-b.lv)[0];
+    if(plBest&&myWorst&&plBest.lv>myWorst.lv){
+      const pi=S.player.hand.indexOf(plBest),aii=S.ai.hand.indexOf(myWorst);
+      S.player.hand[pi]=myWorst;myWorst.faceUp=true;S.ai.hand[aii]=plBest;plBest.faceUp=false;
+      log(`AI memakai Major Swap! Kartu Lv${plBest.lv} kamu diambil.`,'bad');aiDone();return;
+    }
+  }
+  if(hasSkip&&Math.random()>.45){
+    S.player.skipped=true;
+    if(S.deck.length>0)S.ai.hand.push(S.deck.pop());
+    log('AI memakai Skip! Giliranmu dilewati.','bad');aiDone();return;
+  }
+  if(hasMinor&&Math.random()>.5){
+    const mw=S.ai.hand.filter(c=>!c.locked&&c.id!==hasMinor.id).sort((a,b)=>a.lv-b.lv)[0];
+    const plU=S.player.hand.filter(c=>!c.locked);
+    if(mw&&plU.length){
+      const t=plU[0|Math.random()*plU.length];
+      const pi=S.player.hand.indexOf(t),aii=S.ai.hand.indexOf(mw);
+      S.player.hand[pi]=mw;mw.faceUp=true;S.ai.hand[aii]=t;t.faceUp=false;
+      log('AI memakai Minor Swap.','bad');aiDone();return;
+    }
+  }
+  log('AI pass efek.');aiDone();
+}
+function aiDone(){
+  S.aiThinking=false;S.turn='player';
+  if(S.player.skipped){
+    S.player.skipped=false;
+    log('⏭ Giliranmu dilewati (Skip)!','bad');
+    S.turn='ai';render();setTimeout(aiTurn,1100);return;
+  }
+  S.phase='draw';render();
+}
+
+// ══════════════════════════════
+// END GAME
+// ══════════════════════════════
+function endGame(){
+  S.gameOver=true;
+  const ps=bestScore(S.player.hand),as=bestScore(S.ai.hand);
+  const pTop=topLv(bestCards(S.player.hand));
+  const aTop=topLv(bestCards(S.ai.hand));
+  if(ps>as) showResult('player',ps,as,'');
+  else if(as>ps) showResult('ai',ps,as,'');
+  else if(pTop!==aTop) showResult(pTop>aTop?'player':'ai',ps,as,'(Skor sama — menang kartu level tertinggi)');
+  else runSuddenDeath(ps,as,1);
+}
+
+function runSuddenDeath(ps,as,round){
+  if(S.deck.length<1){showResult('draw',ps,as,'(Deck kosong — tidak bisa Sudden Death)');return;}
+  const pc=S.deck.pop();
+  const ac=S.deck.length>0?S.deck.pop():{lv:0};
+  openModal(`⚡ Sudden Death – Ronde ${round}`,'Skor identik! Masing-masing ambil 1 kartu dari deck.',
+    [{label:'Buka Kartu!',cb:()=>{
+      const mc=document.getElementById('m-cards');
+      mc.innerHTML=`<div class="sd-row">
+        <div><span class="sd-lbl">🧑 KAMU</span>
+          <div class="sd-card-wrap" style="width:72px;height:104px;">${buildProtoCard(pc.lv).outerHTML}</div>
+        </div>
+        <div style="color:var(--muted);font-size:1.3rem;align-self:center;margin-top:1.4rem">VS</div>
+        <div><span class="sd-lbl">🤖 AI</span>
+          <div class="sd-card-wrap" style="width:72px;height:104px;">${ac.lv?buildProtoCard(ac.lv).outerHTML:'<div style="color:var(--muted);font-size:.8rem;font-family:Cinzel">Deck kosong</div>'}</div>
+        </div>
+      </div>`;
+      document.getElementById('m-btns').innerHTML='';
+      const winner=pc.lv>ac.lv?'player':ac.lv>pc.lv?'ai':null;
+      const btn=document.createElement('button');
+      btn.className='btn-a gold';
+      btn.textContent=winner?'Lihat Hasil →':'🔁 Ulang!';
+      btn.onclick=()=>{closeModal();
+        if(winner) showResult(winner,ps,as,`Sudden Death Ronde ${round}: Kamu Lv${pc.lv} | AI Lv${ac.lv}`);
+        else runSuddenDeath(ps,as,round+1);
+      };
+      document.getElementById('m-btns').appendChild(btn);
+    }}]
+  );
+}
+
+function showResult(winner,ps,as,note){
+  document.getElementById('r-crown').textContent=winner==='player'?'👑':winner==='ai'?'🤖':'🤝';
+  document.getElementById('r-title').textContent=winner==='player'?'Kamu Menang!':winner==='ai'?'AI Menang!':'Seri!';
+  document.getElementById('r-detail').textContent=`Skormu: ${ps}  |  Skor AI: ${as}${note?'\n'+note:''}`;
+  const rp=document.getElementById('r-players');rp.innerHTML='';
+  [{lbl:'🧑 Kamu',hand:S.player.hand,score:ps,win:winner==='player'},
+   {lbl:'🤖 AI',hand:S.ai.hand,score:as,win:winner==='ai'}
+  ].forEach(({lbl,hand,score,win})=>{
+    const bc=bestCards(hand);
+    const div=document.createElement('div');
+    div.className='r-player'+(win?' win':'');
+    div.innerHTML=`<h3>${lbl}</h3><div class="r-score">${score}</div>
+      <div class="r-3cards">
+        ${bc.map(c=>`<div class="r-pip" style="background:${LV[c.lv].col}20;border:1px solid ${LV[c.lv].col}60;color:${LV[c.lv].col}">Lv${c.lv} · ${c.lv}p</div>`).join('')}
+      </div>`;
+    rp.appendChild(div);
+  });
+  show('result-screen');
+}
+
+// ══════════════════════════════
+// LOG & MODAL
+// ══════════════════════════════
+function log(msg,t=''){
+  const el=document.getElementById('glog');
+  const d=document.createElement('div');
+  d.className='le'+(t?' '+t:'');d.textContent=msg;
+  el.prepend(d);
+  while(el.children.length>20)el.removeChild(el.lastChild);
+}
+function clearLog(){document.getElementById('glog').innerHTML='';}
+
+function openModal(title,body,btns){
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').textContent=body;
+  document.getElementById('m-cards').innerHTML='';
+  const be=document.getElementById('m-btns');be.innerHTML='';
+  btns.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='btn-a gold';btn.textContent=b.label;btn.onclick=b.cb;
+    // Show mini proto card in modal buttons if card provided
+    if(b.card){
+      const mini=document.createElement('div');
+      mini.style.cssText='display:flex;align-items:center;gap:.5rem;';
+      const cw=document.createElement('div');cw.style.cssText='width:40px;height:56px;flex-shrink:0;border-radius:4px;overflow:hidden;';
+      const face=buildProtoCard(b.card.lv);
+      face.style.cssText='position:static;border-radius:4px;width:40px;height:56px;';
+      cw.appendChild(face);
+      mini.appendChild(cw);
+      const lbl=document.createElement('span');lbl.textContent=b.label;lbl.style.cssText='font-family:Cinzel,serif;font-size:.75rem;';
+      mini.appendChild(lbl);
+      btn.textContent='';btn.appendChild(mini);
+    }
+    be.appendChild(btn);
+  });
+  document.getElementById('ovl').classList.add('open');
+}
+function closeModal(){document.getElementById('ovl').classList.remove('open');}
+</script>
+</body>
+</html>
