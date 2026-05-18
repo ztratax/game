@@ -261,6 +261,108 @@ svg.sym{display:block;}
 .p1-indicator{color:var(--red);}
 .p2-indicator{color:var(--green);}
 .p3-indicator{color:var(--purple);}
+
+/* ════════════════════════════════
+   FLYING CARD ANIMATIONS
+   ════════════════════════════════ */
+.flying-card {
+  position: fixed;
+  width: 72px;
+  height: 100px;
+  z-index: 500;
+  pointer-events: none;
+  transition: none;
+  border-radius: 5px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+}
+.flying-card .card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+}
+.flying-card .card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  backface-visibility: hidden;
+  background: #ffffff;
+  overflow: hidden;
+}
+.flying-card .card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+  background: linear-gradient(140deg,#10102a 0%,#1a1a3e 50%,#0c0c1e 100%);
+  border: 2px solid var(--gold-dim);
+}
+.flying-card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Trail effect */
+.flying-card::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 7px;
+  background: inherit;
+  opacity: 0.3;
+  filter: blur(4px);
+  z-index: -1;
+}
+
+/* Glow based on card level */
+.flying-card.lv1 { filter: drop-shadow(0 0 8px rgba(160,160,160,.4)); }
+.flying-card.lv2 { filter: drop-shadow(0 0 8px rgba(26,95,200,.4)); }
+.flying-card.lv3 { filter: drop-shadow(0 0 8px rgba(240,168,48,.4)); }
+.flying-card.lv4 { filter: drop-shadow(0 0 8px rgba(14,192,96,.4)); }
+.flying-card.lv5 { filter: drop-shadow(0 0 8px rgba(85,51,221,.4)); }
+.flying-card.lv6 { filter: drop-shadow(0 0 10px rgba(204,17,17,.5)); }
+.flying-card.lv7 { filter: drop-shadow(0 0 12px rgba(51,51,51,.6)); }
+
+/* Impact flash when card arrives */
+@keyframes impactFlash {
+  0% { box-shadow: 0 0 0 0 rgba(201,168,76,.6); }
+  50% { box-shadow: 0 0 20px 8px rgba(201,168,76,.3); }
+  100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+}
+.impact-flash {
+  animation: impactFlash .4s ease-out;
+}
+
+/* Pool shrink animation */
+@keyframes poolShrink {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.85); }
+  100% { transform: scale(1); }
+}
+.pool-shrink {
+  animation: poolShrink .3s ease;
+}
+
+/* Card received bounce */
+@keyframes cardBounce {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+  60% { transform: translateY(3px); }
+  100% { transform: translateY(0); }
+}
+.card-bounce {
+  animation: cardBounce .4s ease;
+}
+
+/* Discard fly animation */
+@keyframes discardFly {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(0.6) rotate(180deg); opacity: 0.5; }
+  100% { transform: scale(0.3) rotate(360deg); opacity: 0; }
+}
+.discard-fly {
+  animation: discardFly .5s ease-in forwards;
+}
 </style>
 <base target="_blank">
 </head>
@@ -466,6 +568,191 @@ function playSound(type){
   }catch(e){}
 }
 function toggleSound(){soundEnabled=!soundEnabled;const b=document.getElementById('sound-toggle');b.textContent=soundEnabled?'🔊':'🔇';b.classList.toggle('muted',!soundEnabled);if(soundEnabled)initAudio();}
+
+
+// ══════════════════════════════
+// FLYING CARD ANIMATION ENGINE
+// ══════════════════════════════
+
+/**
+ * Animate a card flying from source element to destination element
+ * @param {number} lv - Card level (for visual)
+ * @param {HTMLElement} fromEl - Source element (pool, hand, etc.)
+ * @param {HTMLElement} toEl - Destination element
+ * @param {Object} options - {duration, flip, onArrive, showFace}
+ */
+function flyCard(lv, fromEl, toEl, options = {}) {
+  return new Promise(resolve => {
+    const {
+      duration = 600,
+      flip = false,
+      showFace = true,
+      delay = 0
+    } = options;
+
+    const card = document.createElement('div');
+    card.className = `flying-card lv${lv}`;
+
+    const inner = document.createElement('div');
+    inner.className = 'card-inner';
+
+    const face = buildProtoCard(lv);
+    face.style.position = 'static';
+    face.style.borderRadius = '5px';
+    face.style.width = '72px';
+    face.style.height = '100px';
+
+    const back = document.createElement('div');
+    back.className = 'card-back';
+    back.innerHTML = '<div class="card-back-z">Z</div>';
+
+    inner.appendChild(face);
+    inner.appendChild(back);
+    card.appendChild(inner);
+
+    if (!showFace) {
+      card.classList.add('flipped');
+    }
+
+    document.body.appendChild(card);
+
+    // Get positions
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+
+    // Start position (centered on source)
+    const startX = fromRect.left + fromRect.width / 2 - 36;
+    const startY = fromRect.top + fromRect.height / 2 - 50;
+
+    // End position (centered on destination)
+    const endX = toRect.left + toRect.width / 2 - 36;
+    const endY = toRect.top + toRect.height / 2 - 50;
+
+    // Set initial position
+    card.style.left = startX + 'px';
+    card.style.top = startY + 'px';
+    card.style.transform = 'scale(0.8)';
+    card.style.opacity = '0';
+
+    // Animate
+    requestAnimationFrame(() => {
+      card.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+      card.style.left = endX + 'px';
+      card.style.top = endY + 'px';
+      card.style.transform = 'scale(1)';
+      card.style.opacity = '1';
+
+      if (flip) {
+        setTimeout(() => {
+          card.classList.toggle('flipped');
+        }, duration * 0.4);
+      }
+    });
+
+    // Cleanup after animation
+    setTimeout(() => {
+      // Add impact flash to destination
+      toEl.classList.add('impact-flash');
+      setTimeout(() => toEl.classList.remove('impact-flash'), 400);
+
+      card.style.transition = 'all 200ms ease';
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.6)';
+
+      setTimeout(() => {
+        card.remove();
+        resolve();
+      }, 200);
+    }, duration + delay);
+  });
+}
+
+/**
+ * Animate card flying to discard pile
+ */
+function flyToDiscard(lv, fromEl) {
+  return new Promise(resolve => {
+    const discardEl = document.getElementById('discard-pile');
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = discardEl.getBoundingClientRect();
+
+    const card = document.createElement('div');
+    card.className = `flying-card lv${lv}`;
+
+    const inner = document.createElement('div');
+    inner.className = 'card-inner';
+
+    const face = buildProtoCard(lv);
+    face.style.position = 'static';
+    face.style.borderRadius = '5px';
+    face.style.width = '72px';
+    face.style.height = '100px';
+
+    const back = document.createElement('div');
+    back.className = 'card-back';
+    back.innerHTML = '<div class="card-back-z">Z</div>';
+
+    inner.appendChild(face);
+    inner.appendChild(back);
+    card.appendChild(inner);
+
+    document.body.appendChild(card);
+
+    const startX = fromRect.left + fromRect.width / 2 - 36;
+    const startY = fromRect.top + fromRect.height / 2 - 50;
+    const endX = toRect.left + toRect.width / 2 - 36;
+    const endY = toRect.top + toRect.height / 2 - 50;
+
+    card.style.left = startX + 'px';
+    card.style.top = startY + 'px';
+    card.style.opacity = '1';
+
+    requestAnimationFrame(() => {
+      card.style.transition = 'all 500ms ease-in';
+      card.style.left = endX + 'px';
+      card.style.top = endY + 'px';
+      card.classList.add('discard-fly');
+    });
+
+    setTimeout(() => {
+      discardEl.classList.add('pool-shrink');
+      setTimeout(() => discardEl.classList.remove('pool-shrink'), 300);
+      card.remove();
+      resolve();
+    }, 500);
+  });
+}
+
+/**
+ * Animate multiple cards with stagger
+ */
+async function flyCardsSequentially(cards) {
+  for (const card of cards) {
+    await flyCard(card.lv, card.from, card.to, card.options);
+  }
+}
+
+/**
+ * Get the visual element for a player's hand zone
+ */
+function getPlayerZoneEl(pid) {
+  return document.getElementById('p' + pid + '-zone');
+}
+
+/**
+ * Get the visual element for pool
+ */
+function getPoolEl() {
+  return document.getElementById('deck-pile');
+}
+
+/**
+ * Get the visual element for a specific card in hand (if visible)
+ */
+function getCardEl(pid, cardId) {
+  const row = document.getElementById('p' + pid + '-cards');
+  return row.querySelector(`[data-id="${cardId}"]`) || row;
+}
 
 // ══════════════════════════════
 // CARD DATA
@@ -741,13 +1028,23 @@ function selectCard(card){
   render();
 }
 
-function playerDraw(){
+async function playerDraw(){
   if(S.turn!==0||S.phase!=='draw'||S.gameOver)return;
   initAudio();
   if(S.pool.length===0){endGame();return;}
-  const d=S.pool.pop();d.faceUp=true;S.players[0].hand.push(d);
+
+  const d=S.pool.pop();
+  d.faceUp=true;
+
+  // Animate card flying from pool to player
+  const poolEl = getPoolEl();
+  const playerEl = getPlayerZoneEl(0);
+  await flyCard(d.lv, poolEl, playerEl, {duration: 500, showFace: true});
+
+  S.players[0].hand.push(d);
   playSound('draw');
   log(`Kamu mengambil Lv${d.lv} ${LV[d.lv].name} (${d.lv}p)`);
+
   if(S.pool.length===0){log('⚠ Pool habis!','bad');S.phase='effect';S.sel=null;render();setTimeout(endGame,600);return;}
   S.phase='effect';S.sel=null;render();
 }
@@ -812,13 +1109,27 @@ function effSwap(){
               const oppCard=oppHand[Math.floor(Math.random()*oppHand.length)];
               const pi=S.players[0].hand.indexOf(c);
               const oi=S.players[tp].hand.indexOf(oppCard);
+
+              // Animate cards swapping
+              const myCardEl = getCardEl(0, c.id);
+              const oppZoneEl = getPlayerZoneEl(tp);
+              const myZoneEl = getPlayerZoneEl(0);
+
+              // Animate opponent's card coming to player
+              flyCard(oppCard.lv, oppZoneEl, myZoneEl, {duration: 500, showFace: true});
+              // Animate player's card going to opponent
+              flyCard(c.lv, myCardEl, oppZoneEl, {duration: 500, showFace: false, delay: 100});
+
               S.players[0].hand[pi]=oppCard;oppCard.faceUp=true;
               S.players[tp].hand[oi]=c;c.faceUp=false;
+
               // Move effect card to discard
               const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
               if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+
               log(`✅ Swap: Lv${c.lv} ↔ Lv${oppCard.lv} dengan ${P_NAMES[tp]}`,'good');
-              closeModal();doneEffect();
+              closeModal();
+              setTimeout(()=>doneEffect(), 600);
             }
           }))
         );
@@ -866,11 +1177,17 @@ function effDestroy(){
 
         openModal('💥 Destroy — Pilih Kartu','Semua kartu lawan terbuka. Pilih 1 untuk dihancurkan:',
           oppHand.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
-            cb:()=>{
+            cb:async()=>{
               const oi=S.players[tp].hand.findIndex(x=>x.id===c.id);
               if(oi>=0){
                 const destroyed=S.players[tp].hand.splice(oi,1)[0];
-                destroyed.faceUp=true;S.discard.push(destroyed);
+                destroyed.faceUp=true;
+
+                // Animate card flying to discard
+                const oppCardEl = getCardEl(tp, c.id);
+                await flyToDiscard(c.lv, oppCardEl);
+
+                S.discard.push(destroyed);
               }
               // Move effect card to discard
               const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
@@ -895,12 +1212,19 @@ function effLock(){
         if(!opts.length){log('Tidak ada kartu yang bisa dikunci.','bad');return;}
         openModal('🔒 Lock — Pilih Kartu','Pilih kartu yang ingin dikunci ke Area Terkunci:',
           opts.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
-            cb:()=>{
+            cb:async()=>{
               if(c.lv<6){log('Hanya bisa kunci Level 6 atau 7!','bad');closeModal();return;}
+
               const pi=S.players[0].hand.findIndex(x=>x.id===c.id);
               if(pi>=0){
                 const locked=S.players[0].hand.splice(pi,1)[0];
                 locked.locked=true;locked.faceUp=true;
+
+                // Animate card to locked area
+                const cardEl = getCardEl(0, c.id);
+                const lockedRow = document.getElementById('p0-locked-row');
+                await flyCard(c.lv, cardEl, lockedRow, {duration: 500, showFace: true});
+
                 S.players[0].locked.push(locked);
               }
               // Move effect card (Lv6) to discard
@@ -928,11 +1252,17 @@ function effLock(){
               const oppHigh=S.players[tp].hand.filter(c=>c.lv>=6&&!c.locked);
               openModal('🔒 Lock — Pilih Kartu Lawan','Pilih kartu Level 6+ untuk dikunci:',
                 oppHigh.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
-                  cb:()=>{
+                  cb:async()=>{
                     const oi=S.players[tp].hand.findIndex(x=>x.id===c.id);
                     if(oi>=0){
                       const locked=S.players[tp].hand.splice(oi,1)[0];
                       locked.locked=true;locked.faceUp=true;
+
+                      // Animate card to opponent's locked area
+                      const oppCardEl = getCardEl(tp, c.id);
+                      const oppLockedRow = document.getElementById('p'+tp+'-locked-row');
+                      await flyCard(c.lv, oppCardEl, oppLockedRow, {duration: 500, showFace: true});
+
                       S.players[tp].locked.push(locked);
                     }
                     // Move effect card (Lv6) to discard
@@ -988,7 +1318,15 @@ function effReset(){
   );
 }
 
-function doneEffect(){S.sel=null;endTurn();}
+async function doneEffect(){
+  if(S.sel){
+    // Animate effect card to discard
+    const cardEl = getCardEl(0, S.sel.id);
+    await flyToDiscard(S.sel.lv, cardEl);
+  }
+  S.sel=null;
+  endTurn();
+}
 
 function endTurn(){
   // Decrement shield
@@ -1015,10 +1353,20 @@ function endTurn(){
   }
 }
 
+
+/**
+ * Animate AI card to discard
+ */
+async function aiDiscardCard(p, card) {
+  const aiEl = getPlayerZoneEl(p);
+  const discardEl = document.getElementById('discard-pile');
+  await flyCard(card.lv, aiEl, discardEl, {duration: 400, showFace: false});
+}
+
 // ══════════════════════════════
 // AI TURN
 // ══════════════════════════════
-function aiTurn(){
+async function aiTurn(){
   if(S.gameOver)return;
   const p=S.turn;
 
@@ -1034,14 +1382,21 @@ function aiTurn(){
 
   // Draw
   if(S.pool.length===0){endGame();return;}
-  const d=S.pool.pop();S.players[p].hand.push(d);
+  const d=S.pool.pop();
+
+  // Animate card flying from pool to AI
+  const poolEl = getPoolEl();
+  const aiEl = getPlayerZoneEl(p);
+  await flyCard(d.lv, poolEl, aiEl, {duration: 500, showFace: false, delay: 100});
+
+  S.players[p].hand.push(d);
   log(`${P_NAMES[p]} mengambil kartu.`);
   if(S.pool.length===0){log('⚠ Pool habis!','bad');render();setTimeout(endGame,500);return;}
 
-  setTimeout(()=>aiEffect(p),700);
+  setTimeout(async()=>await aiEffect(p),700);
 }
 
-function aiEffect(p){
+async function aiEffect(p){
   const player=S.players[p];
   const effCards=player.hand.filter(c=>LV[c.lv].eff&&!c.locked);
   if(!effCards.length){log(`${P_NAMES[p]} pass efek.`,'info');aiDone(p);return;}
@@ -1080,6 +1435,10 @@ function aiEffect(p){
       const idx=player.hand.findIndex(c=>c.id===shieldCard.id);
       player.hand.splice(idx,1);shieldCard.faceUp=true;S.discard.push(shieldCard);
       player.shieldTurns=1;
+      // Animate shield card to discard
+      const aiZoneSh = getPlayerZoneEl(p);
+      flyToDiscard(3, aiZoneSh);
+
       log(`🛡 ${P_NAMES[p]} mengaktifkan Shield.`,'info');
       aiDone(p);return;
     }
@@ -1094,6 +1453,11 @@ function aiEffect(p){
       player.hand.splice(i7,1);lv7.locked=true;lv7.faceUp=true;player.locked.push(lv7);
       const i6=player.hand.findIndex(c=>c.id===lv6.id);
       player.hand.splice(i6,1);lv6.faceUp=true;S.discard.push(lv6);
+      // Animate lock
+      const aiZoneL7 = getPlayerZoneEl(p);
+      const aiLockedRow = document.getElementById('p'+p+'-locked-row');
+      flyCard(7, aiZoneL7, aiLockedRow, {duration: 400, showFace: true});
+
       log(`🔒 ${P_NAMES[p]} mengunci Lv7 dengan Lv6!`,'bad');
       aiDone(p);return;
     }
@@ -1109,6 +1473,11 @@ function aiEffect(p){
       player.hand.splice(il,1);toLock.locked=true;toLock.faceUp=true;player.locked.push(toLock);
       const ik=player.hand.findIndex(c=>c.id===locker.id);
       player.hand.splice(ik,1);locker.faceUp=true;S.discard.push(locker);
+      // Animate lock
+      const aiZoneL6 = getPlayerZoneEl(p);
+      const aiLockedRow6 = document.getElementById('p'+p+'-locked-row');
+      flyCard(6, aiZoneL6, aiLockedRow6, {duration: 400, showFace: true});
+
       log(`🔒 ${P_NAMES[p]} mengunci Lv6 dengan Lv6.`,'bad');
       aiDone(p);return;
     }
@@ -1145,6 +1514,14 @@ function aiEffect(p){
       opp.hand=newHand;
       const fi=player.hand.findIndex(c=>c.id===hasReset.id);
       player.hand.splice(fi,1);hasReset.faceUp=true;S.discard.push(hasReset);
+      // Animate reset - cards fly to pool then back
+      const oppZoneR = getPlayerZoneEl(strongestOpp);
+      const poolElR = getPoolEl();
+
+      for(const card of toReturn){
+        flyCard(card.lv, oppZoneR, poolElR, {duration: 300, showFace: false, delay: 30});
+      }
+
       log(`⬢ ${P_NAMES[p]} Reset ${P_NAMES[strongestOpp]}!`,'bad');
       aiDone(p);return;
     }
@@ -1186,7 +1563,7 @@ function aiEffect(p){
   aiDone(p);
 }
 
-function aiDone(p){
+async function aiDone(p){
   // Decrement shields
   for(let i=0;i<4;i++){
     if(S.players[i].shieldTurns>0)S.players[i].shieldTurns--;
