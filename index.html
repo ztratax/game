@@ -262,6 +262,7 @@ svg.sym{display:block;}
 .p2-indicator{color:var(--green);}
 .p3-indicator{color:var(--purple);}
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -283,26 +284,26 @@ svg.sym{display:block;}
 <!-- ════ RULES ════ -->
 <div id="rules-screen" class="screen">
   <h2>📜 Cara Bermain — Mode Catur Terbuka</h2>
-  
+
   <div class="rs"><h3>🎯 Tujuan</h3>
   <p>Kumpulkan <strong>3 kartu terbaik</strong> (dari tangan + Area Terkunci) dengan total poin tertinggi saat Pool habis. Maksimum <strong>19 poin</strong> (6+6+7).</p></div>
-  
+
   <div class="rs"><h3>📋 Setup & Draft</h3>
   <p>50 kartu dikocok. <strong>Draft bergiliran</strong> (A→B→C→D→D→C→B→A→A→...), tiap pemain ambil 1 kartu per giliran sampai masing-masing punya <strong>4 kartu</strong>. Sisa jadi <strong>Pool</strong> (~34 kartu).</p></div>
-  
+
   <div class="rs"><h3>🔄 Urutan Giliran (per pemain)</h3>
   <ul>
     <li><strong>1. Ambil Kartu</strong> dari Pool (wajib).</li>
     <li><strong>2. Pakai Efek</strong> dari 1 kartu di tangan (opsional) → kartu ke <strong>Discard</strong>.</li>
     <li><strong>3. Pass</strong> bila tidak mau pakai efek.</li>
   </ul></div>
-  
+
   <div class="rs"><h3>🔒 Area Terkunci</h3>
   <p>Kartu yang dikunci diletakkan di <strong>Area Terkunci</strong> (terpisah dari tangan). Kartu di sana <strong>kebal</strong> dari Reset dan Destroy. Hanya bisa dikunci dengan <strong>Level 6</strong> (kunci kartu lain) atau <strong>Level 7</strong> (kunci diri sendiri via Reset).</p></div>
-  
+
   <div class="rs"><h3>🛡 Shield (Level 3)</h3>
   <p>Shield melindungi <strong>seluruh tangan</strong> dari efek lawan selama <strong>1 giliran penuh</strong> (sampai giliran pemain berikutnya). Setelah itu, shield habis.</p></div>
-  
+
   <div class="rs"><h3>⚡ Level & Efek</h3>
   <table class="rtbl">
     <tr><th>Lv</th><th>Nama</th><th>Poin</th><th>Jml</th><th>Efek</th><th>Cost</th></tr>
@@ -314,7 +315,7 @@ svg.sym{display:block;}
     <tr><td>6</td><td>Maestro</td><td>6</td><td>3</td><td><b>Lock</b> — kunci 1 kartu (diri/lawan) → Area Terkunci</td><td>-6</td></tr>
     <tr><td>7</td><td>Tak Tersentuh</td><td>7</td><td>1</td><td><b>Reset</b> — kocok ulang tangan lawan (ke Pool)</td><td>-7</td></tr>
   </table></div>
-  
+
   <div class="rs"><h3>💡 Tips Strategi</h3>
   <ul>
     <li><strong>Draft:</strong> Prioritas 7 > 6 > 5 > 4 > 3 > 2 > 1</li>
@@ -324,7 +325,7 @@ svg.sym{display:block;}
     <li><strong>Destroy:</strong> Targetkan Level 7 lawan sebelum mereka kunci.</li>
     <li><strong>Skip:</strong> Gunakan saat lawan mau kunci atau Reset.</li>
   </ul></div>
-  
+
   <button class="btn-prim" onclick="show('title-screen')" style="margin-top:1rem;align-self:center">← Kembali</button>
 </div>
 
@@ -349,7 +350,7 @@ svg.sym{display:block;}
     <div class="pool-track">Pool: <b id="pool-num">34</b> | Discard: <b id="discard-num">0</b></div>
     <button class="btn-icon" onclick="show('title-screen')">✕ Menu</button>
   </div>
-  
+
   <div class="g-body">
     <!-- AI Players (top) -->
     <div class="p-zone" id="p1-zone">
@@ -360,7 +361,7 @@ svg.sym{display:block;}
         <div class="locked-row" id="p1-locked-row"></div>
       </div>
     </div>
-    
+
     <div class="p-zone" id="p2-zone">
       <div class="zlabel"><span class="p2-indicator">●</span> Pemain C <span class="zscore" id="p2-sc">? poin</span></div>
       <div class="card-row" id="p2-cards"></div>
@@ -369,7 +370,7 @@ svg.sym{display:block;}
         <div class="locked-row" id="p2-locked-row"></div>
       </div>
     </div>
-    
+
     <div class="p-zone" id="p3-zone">
       <div class="zlabel"><span class="p3-indicator">●</span> Pemain D <span class="zscore" id="p3-sc">? poin</span></div>
       <div class="card-row" id="p3-cards"></div>
@@ -378,7 +379,7 @@ svg.sym{display:block;}
         <div class="locked-row" id="p3-locked-row"></div>
       </div>
     </div>
-    
+
     <!-- Center -->
     <div class="center-zone">
       <div class="deck-pile" id="deck-pile" onclick="playerDraw()">
@@ -390,7 +391,7 @@ svg.sym{display:block;}
         <div class="discard-count" id="discard-count">0</div>
       </div>
     </div>
-    
+
     <!-- Action Panel -->
     <div class="a-panel">
       <div class="turn-row">
@@ -406,7 +407,7 @@ svg.sym{display:block;}
       </div>
       <div id="glog"></div>
     </div>
-    
+
     <!-- Human Player (bottom) -->
     <div class="p-zone active-zone" id="p0-zone">
       <div class="zlabel"><span class="p0-indicator">●</span> 🧑 Kamu (Pemain A) <span class="zscore" id="p0-sc">? poin</span></div>
@@ -440,9 +441,856 @@ svg.sym{display:block;}
 </div>
 
 <script>
-'''
 
-with open('/mnt/agents/output/ztratax_new.html', 'w', encoding='utf-8') as f:
-    f.write(html)
+// ══════════════════════════════
+// AUDIO ENGINE
+// ══════════════════════════════
+let audioCtx = null, soundEnabled = true;
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+function playSound(type){
+  if(!soundEnabled||!audioCtx)return;
+  try{
+    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    switch(type){
+      case 'draw':osc.type='sine';osc.frequency.setValueAtTime(440,audioCtx.currentTime);osc.frequency.exponentialRampToValueAtTime(880,audioCtx.currentTime+.1);gain.gain.setValueAtTime(.12,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.18);osc.start();osc.stop(audioCtx.currentTime+.18);break;
+      case 'select':osc.type='sine';osc.frequency.setValueAtTime(600,audioCtx.currentTime);gain.gain.setValueAtTime(.08,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.06);osc.start();osc.stop(audioCtx.currentTime+.06);break;
+      case 'effect':osc.type='triangle';osc.frequency.setValueAtTime(523,audioCtx.currentTime);osc.frequency.setValueAtTime(659,audioCtx.currentTime+.08);osc.frequency.setValueAtTime(784,audioCtx.currentTime+.16);gain.gain.setValueAtTime(.1,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.35);osc.start();osc.stop(audioCtx.currentTime+.35);break;
+      case 'win':[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.type='sine';o.frequency.setValueAtTime(f,audioCtx.currentTime+i*.12);g.gain.setValueAtTime(.12,audioCtx.currentTime+i*.12);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.12+.25);o.start(audioCtx.currentTime+i*.12);o.stop(audioCtx.currentTime+i*.12+.25);});break;
+      case 'lose':osc.type='sawtooth';osc.frequency.setValueAtTime(300,audioCtx.currentTime);osc.frequency.exponentialRampToValueAtTime(80,audioCtx.currentTime+.35);gain.gain.setValueAtTime(.08,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.35);osc.start();osc.stop(audioCtx.currentTime+.35);break;
+      case 'lock':osc.type='square';osc.frequency.setValueAtTime(800,audioCtx.currentTime);osc.frequency.setValueAtTime(1000,audioCtx.currentTime+.04);gain.gain.setValueAtTime(.06,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.12);osc.start();osc.stop(audioCtx.currentTime+.12);break;
+      case 'destroy':osc.type='sawtooth';osc.frequency.setValueAtTime(150,audioCtx.currentTime);osc.frequency.exponentialRampToValueAtTime(50,audioCtx.currentTime+.25);gain.gain.setValueAtTime(.1,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.25);osc.start();osc.stop(audioCtx.currentTime+.25);break;
+      case 'shield':osc.type='sine';osc.frequency.setValueAtTime(700,audioCtx.currentTime);osc.frequency.setValueAtTime(900,audioCtx.currentTime+.06);osc.frequency.setValueAtTime(1100,audioCtx.currentTime+.12);gain.gain.setValueAtTime(.08,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.2);osc.start();osc.stop(audioCtx.currentTime+.2);break;
+      case 'reset':osc.type='sawtooth';osc.frequency.setValueAtTime(100,audioCtx.currentTime);osc.frequency.linearRampToValueAtTime(400,audioCtx.currentTime+.15);osc.frequency.linearRampToValueAtTime(80,audioCtx.currentTime+.4);gain.gain.setValueAtTime(.1,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.4);osc.start();osc.stop(audioCtx.currentTime+.4);break;
+    }
+  }catch(e){}
+}
+function toggleSound(){soundEnabled=!soundEnabled;const b=document.getElementById('sound-toggle');b.textContent=soundEnabled?'🔊':'🔇';b.classList.toggle('muted',!soundEnabled);if(soundEnabled)initAudio();}
 
-print(f"Part 1 written: {len(html)} bytes")
+// ══════════════════════════════
+// CARD DATA
+// ══════════════════════════════
+const LV=[null,
+  {lv:1,name:'Bidak',pts:1,cnt:16,eff:null,col:'#a0a0a0'},
+  {lv:2,name:'Perunding',pts:2,cnt:12,eff:'swap',col:'#1a5fc8'},
+  {lv:3,name:'Figur',pts:3,cnt:8,eff:'shield',col:'#f0a830'},
+  {lv:4,name:'Pengelola',pts:4,cnt:6,eff:'skip',col:'#0ec060'},
+  {lv:5,name:'Konglomerat',pts:5,cnt:4,eff:'destroy',col:'#5533dd'},
+  {lv:6,name:'Maestro',pts:6,cnt:3,eff:'lock',col:'#cc1111'},
+  {lv:7,name:'Tak Tersentuh',pts:7,cnt:1,eff:'reset',col:'#333333'},
+];
+const P_NAMES=['Kamu (A)','Pemain B','Pemain C','Pemain D'];
+const P_COLORS=['var(--blue)','var(--red)','var(--green)','var(--purple)'];
+
+function makeSym(lv,size=34){
+  const c=LV[lv].col;
+  switch(lv){
+    case 1:return`<svg class="sym" width="${size}" height="${size*1.2}" viewBox="0 0 34 42"><rect x="6" y="4" width="22" height="34" rx="7" ry="7" fill="${c}"/></svg>`;
+    case 2:return`<svg class="sym" width="${size}" height="${size}" viewBox="0 0 34 34"><circle cx="17" cy="17" r="13" fill="${c}"/></svg>`;
+    case 3:return`<svg class="sym" width="${size}" height="${size*.88}" viewBox="0 0 34 30"><polygon points="17,2 32,28 2,28" fill="${c}"/></svg>`;
+    case 4:return`<svg class="sym" width="${size}" height="${size}" viewBox="0 0 34 34"><rect x="6" y="6" width="22" height="22" fill="${c}"/></svg>`;
+    case 5:return`<svg class="sym" width="${size}" height="${size}" viewBox="0 0 34 34"><polygon points="17,2 31,12 26,28 8,28 3,12" fill="${c}"/></svg>`;
+    case 6:return`<svg class="sym" width="${size}" height="${size}" viewBox="0 0 34 34"><polygon points="17,2 20,12 31,12 23,19 26,31 17,24 8,31 11,19 3,12 14,12" fill="${c}"/></svg>`;
+    case 7:return`<svg class="sym" width="${size}" height="${size}" viewBox="0 0 34 34"><polygon points="17,2 29,8 33,21 25,32 9,32 1,21 5,8" fill="${c}"/></svg>`;
+  }
+}
+
+function buildProtoCard(lv){
+  const d=LV[lv];
+  const wrap=document.createElement('div');
+  wrap.className='card-face';
+  wrap.style.setProperty('--cc',d.col);
+  wrap.style.cssText+=`--cc:${d.col};`;
+  const border=document.createElement('div');border.className='cf-border';border.style.borderColor=d.col;
+  const dotTL=document.createElement('div');dotTL.className='dot tl';dotTL.style.background=d.col;
+  const dotBR=document.createElement('div');dotBR.className='dot br';dotBR.style.background=d.col;
+  const sym=document.createElement('div');sym.className='cf-sym';sym.innerHTML=makeSym(lv);
+  const lvLabel=document.createElement('div');lvLabel.className='cf-lv';lvLabel.style.color=d.col;lvLabel.textContent=`Lv${lv}·${d.pts}p`;
+  const nm=document.createElement('div');nm.className='cf-nm';nm.style.color=d.col;nm.textContent=d.name;
+  wrap.appendChild(border);wrap.appendChild(dotTL);wrap.appendChild(dotBR);wrap.appendChild(sym);wrap.appendChild(lvLabel);wrap.appendChild(nm);
+  return wrap;
+}
+
+// Title preview
+(function(){
+  const c=document.getElementById('t-cards');
+  for(let lv=1;lv<=7;lv++){
+    const outer=document.createElement('div');
+    outer.style.cssText='width:46px;height:64px;border-radius:4px;overflow:hidden;cursor:default;transition:transform .2s;flex-shrink:0;';
+    outer.onmouseenter=()=>{outer.style.transform='translateY(-7px) rotate(-2deg)';};
+    outer.onmouseleave=()=>{outer.style.transform='none';};
+    const face=buildProtoCard(lv);face.style.position='static';face.style.borderRadius='4px';face.style.width='46px';face.style.height='64px';
+    outer.appendChild(face);c.appendChild(outer);
+  }
+})();
+
+// ══════════════════════════════
+// GAME STATE
+// ══════════════════════════════
+let uid=0,S=null;
+function mkCard(lv){return{id:uid++,lv,locked:false,faceUp:false,shielded:false,source:'pool'};}
+function buildDeck(){
+  const d=[];
+  for(let lv=1;lv<=7;lv++)for(let i=0;i<LV[lv].cnt;i++)d.push(mkCard(lv));
+  return shuffle(d);
+}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function bestScore(h,locked){const all=[...h,...locked];if(!all.length)return 0;return[...all].sort((a,b)=>b.lv-a.lv).slice(0,3).reduce((s,c)=>s+c.lv,0);}
+function bestCards(h,locked){const all=[...h,...locked];return[...all].sort((a,b)=>b.lv-a.lv).slice(0,3);}
+function topLv(h){return h.reduce((m,c)=>c.lv>m?c.lv:m,0);}
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// ══════════════════════════════
+// DRAFT PHASE
+// ══════════════════════════════
+let draftOrder=[],draftIdx=0,draftRound=0;
+function startDraft(){
+  initAudio();uid=0;
+  const deck=buildDeck();
+  S={
+    pool:deck,
+    discard:[],
+    players:[
+      {hand:[],locked:[],skipped:false,shieldTurns:0,name:P_NAMES[0],isHuman:true},
+      {hand:[],locked:[],skipped:false,shieldTurns:0,name:P_NAMES[1],isHuman:false},
+      {hand:[],locked:[],skipped:false,shieldTurns:0,name:P_NAMES[2],isHuman:false},
+      {hand:[],locked:[],skipped:false,shieldTurns:0,name:P_NAMES[3],isHuman:false}
+    ],
+    turn:0,phase:'draft',sel:null,gameOver:false,round:1
+  };
+  draftOrder=[0,1,2,3,3,2,1,0,0,1,2,3,3,2,1,0];
+  draftIdx=0;draftRound=1;
+  show('draft-screen');
+  renderDraft();
+}
+
+function renderDraft(){
+  const poolEl=document.getElementById('draft-pool');
+  poolEl.innerHTML='';
+  // Show top 8 cards from pool as visible draft options
+  const visible=S.pool.slice(0,Math.min(8,S.pool.length));
+  visible.forEach((card,idx)=>{
+    const wrap=document.createElement('div');wrap.className='card-wrap';wrap.style.animationDelay=idx*.04+'s';
+    const inner=document.createElement('div');inner.className='card-inner';
+    const face=buildProtoCard(card.lv);
+    face.style.cursor='pointer';
+    face.addEventListener('click',()=>draftPick(card));
+    const back=document.createElement('div');back.className='card-back';back.innerHTML='<div class="card-back-z">Z</div>';
+    inner.appendChild(face);inner.appendChild(back);wrap.appendChild(inner);poolEl.appendChild(wrap);
+  });
+
+  const currentP=draftOrder[draftIdx];
+  document.getElementById('draft-status').textContent=`Giliran ${P_NAMES[currentP]} memilih kartu...`;
+  document.getElementById('draft-info').textContent=`Pool tersisa: ${S.pool.length} kartu | Ronde: ${Math.ceil((draftIdx+1)/4)}/4`;
+
+  // Tracker
+  const tracker=document.getElementById('draft-tracker');tracker.innerHTML='';
+  for(let i=0;i<16;i++){
+    const dot=document.createElement('div');dot.className='draft-dot'+(i===draftIdx?' active':i<draftIdx?' done':'');
+    tracker.appendChild(dot);
+  }
+
+  // AI auto-pick
+  if(!S.players[currentP].isHuman&&draftIdx<16){
+    setTimeout(()=>aiDraftPick(),800);
+  }
+}
+
+function draftPick(card){
+  const currentP=draftOrder[draftIdx];
+  if(!S.players[currentP].isHuman)return;
+  _doDraftPick(card);
+}
+
+function aiDraftPick(){
+  const currentP=draftOrder[draftIdx];
+  // AI draft strategy: prioritize high levels
+  const visible=S.pool.slice(0,Math.min(8,S.pool.length));
+  const pick=visible.sort((a,b)=>b.lv-a.lv)[0];
+  _doDraftPick(pick);
+}
+
+function _doDraftPick(card){
+  const currentP=draftOrder[draftIdx];
+  const idx=S.pool.findIndex(c=>c.id===card.id);
+  if(idx<0)return;
+  const picked=S.pool.splice(idx,1)[0];
+  picked.faceUp=true;
+  S.players[currentP].hand.push(picked);
+
+  draftIdx++;
+  if(draftIdx>=16){
+    // Draft complete, start game
+    S.turn=0;S.phase='draw';S.round=1;
+    show('game-screen');
+    clearLog();
+    log('Draft selesai! Game dimulai. Ambil kartu dari Pool.','imp');
+    render();
+    return;
+  }
+  renderDraft();
+}
+
+// ══════════════════════════════
+// RENDER
+// ══════════════════════════════
+function render(){
+  if(!S)return;
+  for(let p=0;p<4;p++){
+    renderZone(p);
+    document.getElementById('p'+p+'-sc').textContent=(p===0||S.gameOver)?bestScore(S.players[p].hand,S.players[p].locked)+' poin':'? poin';
+    // Show locked area if has locked cards
+    const lockedArea=document.getElementById('p'+p+'-locked');
+    const lockedRow=document.getElementById('p'+p+'-locked-row');
+    if(S.players[p].locked.length>0){
+      lockedArea.style.display='block';
+      lockedRow.innerHTML='';
+      S.players[p].locked.forEach(card=>{
+        const wrap=document.createElement('div');wrap.className='card-wrap';
+        const inner=document.createElement('div');inner.className='card-inner';
+        const face=buildProtoCard(card.lv);
+        inner.appendChild(face);
+        wrap.appendChild(inner);lockedRow.appendChild(wrap);
+      });
+    }else{
+      lockedArea.style.display='none';
+    }
+  }
+  document.getElementById('pool-num').textContent=S.pool.length;
+  document.getElementById('dp-num').textContent=S.pool.length;
+  document.getElementById('discard-num').textContent=S.discard.length;
+  document.getElementById('discard-count').textContent=S.discard.length;
+
+  const isHuman=S.turn===0&&!S.gameOver;
+  const inD=S.phase==='draw',inE=S.phase==='effect';
+  const hasSel=!!S.sel&&S.players[0].hand.some(c=>c.id===S.sel.id);
+  const hasEff=hasSel&&LV[S.sel.lv].eff;
+  const hasShield=S.players[0].hand.some(c=>c.lv===3&&!c.locked);
+
+  document.getElementById('ttxt').textContent=isHuman?`Giliranmu (${P_NAMES[0]})`:`Giliran ${P_NAMES[S.turn]}...`;
+  const pp=document.getElementById('ppill');
+  pp.textContent=inD?'Ambil Kartu':'Pakai / Pass Efek';
+  pp.className='ppill'+(inE?' eff':'');
+
+  document.getElementById('btn-draw').disabled=!isHuman||!inD||S.pool.length===0;
+  document.getElementById('btn-shield').disabled=!isHuman||!inE||!hasShield||S.players[0].shieldTurns>0;
+  document.getElementById('btn-eff').disabled=!isHuman||!inE||!hasEff;
+  document.getElementById('btn-pass').disabled=!isHuman||!inE;
+
+  document.getElementById('deck-pile').style.opacity=S.pool.length===0?'.3':'1';
+
+  for(let p=0;p<4;p++){
+    document.getElementById('p'+p+'-zone').classList.toggle('active-zone',S.turn===p);
+  }
+}
+
+function renderZone(pid){
+  const el=document.getElementById('p'+pid+'-cards');
+  el.innerHTML='';
+  const hand=S.players[pid].hand;
+  const isHuman=pid===0;
+  const isCurrentTurn=S.turn===pid;
+
+  hand.forEach((card,idx)=>{
+    const wrap=document.createElement('div');
+    wrap.className='card-wrap'
+      +(card.locked?' locked-hand':'')
+      +(S.sel&&S.sel.id===card.id?' selected':'')
+      +(S.players[pid].shieldTurns>0?' shielded':'')
+      +(!isHuman&&!card.faceUp&&!S.gameOver?' hidden':'');
+    wrap.style.animationDelay=idx*.04+'s';
+    wrap.dataset.id=card.id;
+
+    const inner=document.createElement('div');inner.className='card-inner';
+    const face=buildProtoCard(card.lv);
+
+    if(isHuman&&isCurrentTurn&&!card.locked){
+      face.style.cursor='pointer';
+      face.addEventListener('click',()=>{initAudio();playSound('select');selectCard(card);});
+    }
+
+    const back=document.createElement('div');back.className='card-back';back.innerHTML='<div class="card-back-z">Z</div>';
+    inner.appendChild(face);inner.appendChild(back);wrap.appendChild(inner);
+
+    if(isHuman){
+      wrap.draggable=true;
+      wrap.addEventListener('dragstart',e=>{e.dataTransfer.setData('cid',card.id);setTimeout(()=>wrap.classList.add('dragging'),0);});
+      wrap.addEventListener('dragend',()=>wrap.classList.remove('dragging'));
+      wrap.addEventListener('dragover',e=>{e.preventDefault();wrap.classList.add('drag-over');});
+      wrap.addEventListener('dragleave',()=>wrap.classList.remove('drag-over'));
+      wrap.addEventListener('drop',e=>{
+        e.preventDefault();wrap.classList.remove('drag-over');
+        const fid=parseInt(e.dataTransfer.getData('cid'));
+        if(fid===card.id)return;
+        const fi=S.players[0].hand.findIndex(c=>c.id===fid);
+        const ti=S.players[0].hand.findIndex(c=>c.id===card.id);
+        if(fi>=0&&ti>=0){[S.players[0].hand[fi],S.players[0].hand[ti]]=[S.players[0].hand[ti],S.players[0].hand[fi]];render();}
+      });
+    }
+    el.appendChild(wrap);
+  });
+}
+
+// ══════════════════════════════
+// ACTIONS
+// ══════════════════════════════
+function selectCard(card){
+  if(S.turn!==0||S.gameOver)return;
+  S.sel=(S.sel?.id===card.id)?null:card;
+  render();
+}
+
+function playerDraw(){
+  if(S.turn!==0||S.phase!=='draw'||S.gameOver)return;
+  initAudio();
+  if(S.pool.length===0){endGame();return;}
+  const d=S.pool.pop();d.faceUp=true;S.players[0].hand.push(d);
+  playSound('draw');
+  log(`Kamu mengambil Lv${d.lv} ${LV[d.lv].name} (${d.lv}p)`);
+  if(S.pool.length===0){log('⚠ Pool habis!','bad');S.phase='effect';S.sel=null;render();setTimeout(endGame,600);return;}
+  S.phase='effect';S.sel=null;render();
+}
+
+function playerPass(){
+  if(S.turn!==0||S.phase!=='effect')return;
+  log('Kamu pass efek.');
+  S.sel=null;
+  endTurn();
+}
+
+function playerUseShield(){
+  if(S.turn!==0||S.phase!=='effect')return;
+  const shieldCard=S.players[0].hand.find(c=>c.lv===3&&!c.locked);
+  if(!shieldCard){log('Tidak ada kartu Shield yang tersedia.','bad');return;}
+  if(S.players[0].shieldTurns>0){log('Shield masih aktif!','bad');return;}
+
+  initAudio();playSound('shield');
+  // Move shield card to discard
+  const idx=S.players[0].hand.findIndex(c=>c.id===shieldCard.id);
+  S.players[0].hand.splice(idx,1);
+  shieldCard.faceUp=true;
+  S.discard.push(shieldCard);
+
+  S.players[0].shieldTurns=1; // Shield lasts until next turn of this player
+  log('🛡 Shield aktif! Tanganmu terlindungi 1 giliran.','good');
+  S.sel=null;
+  endTurn();
+}
+
+function playerUseEffect(){
+  if(!S.sel||S.turn!==0||S.phase!=='effect')return;
+  const c=S.sel;
+  if(!LV[c.lv].eff){log('Kartu ini tidak punya efek.','bad');return;}
+  if(c.locked){log('Kartu terkunci tidak bisa dipakai.','bad');return;}
+  initAudio();playSound('effect');
+  ({swap:effSwap,skip:effSkip,destroy:effDestroy,lock:effLock,reset:effReset})[LV[c.lv].eff]();
+}
+
+// ── Effects ──
+function effSwap(){
+  const opts=S.players[0].hand.filter(c=>c.id!==S.sel.id&&!c.locked);
+  // Get all non-shielded opponents with cards
+  const targets=[];
+  for(let p=1;p<4;p++){
+    if(S.players[p].shieldTurns===0&&S.players[p].hand.length>0){
+      targets.push(p);
+    }
+  }
+  if(!opts.length||!targets.length){log('Tidak ada target untuk Swap.','bad');return;}
+
+  openModal('🔵 Swap','Pilih kartumu yang ingin ditukar, lalu pilih lawan.',
+    opts.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name}`,card:c,
+      cb:()=>{
+        closeModal();
+        // Pick opponent
+        openModal('🔵 Swap — Pilih Lawan','Pilih lawan untuk ditukar:',
+          targets.map(tp=>({label:P_NAMES[tp],
+            cb:()=>{
+              const oppHand=S.players[tp].hand.filter(x=>!x.locked);
+              if(!oppHand.length){log('Lawan tidak punya kartu yang bisa ditukar.','bad');closeModal();return;}
+              const oppCard=oppHand[Math.floor(Math.random()*oppHand.length)];
+              const pi=S.players[0].hand.indexOf(c);
+              const oi=S.players[tp].hand.indexOf(oppCard);
+              S.players[0].hand[pi]=oppCard;oppCard.faceUp=true;
+              S.players[tp].hand[oi]=c;c.faceUp=false;
+              // Move effect card to discard
+              const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
+              if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+              log(`✅ Swap: Lv${c.lv} ↔ Lv${oppCard.lv} dengan ${P_NAMES[tp]}`,'good');
+              closeModal();doneEffect();
+            }
+          }))
+        );
+      }
+    }))
+  );
+}
+
+function effSkip(){
+  const targets=[];
+  for(let p=1;p<4;p++){
+    if(S.players[p].shieldTurns===0)targets.push(p);
+  }
+  if(!targets.length){log('Semua lawan ter-shield.','bad');return;}
+
+  openModal('⏭ Skip','Pilih lawan yang ingin dilewati:',
+    targets.map(tp=>({label:P_NAMES[tp],
+      cb:()=>{
+        S.players[tp].skipped=true;
+        // Move effect card to discard
+        const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
+        if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+        log(`⏭ ${P_NAMES[tp]} kehilangan giliran berikutnya!`,'good');
+        closeModal();doneEffect();
+      }
+    }))
+  );
+}
+
+function effDestroy(){
+  const targets=[];
+  for(let p=1;p<4;p++){
+    if(S.players[p].shieldTurns===0&&S.players[p].hand.length>0){
+      targets.push(p);
+    }
+  }
+  if(!targets.length){log('Tidak ada target untuk Destroy.','bad');return;}
+
+  openModal('💥 Destroy','Pilih lawan yang ingin dihancurkan kartunya:',
+    targets.map(tp=>({label:P_NAMES[tp],
+      cb:()=>{
+        closeModal();
+        const oppHand=S.players[tp].hand.filter(x=>!x.locked);
+        if(!oppHand.length){log('Lawan tidak punya kartu yang bisa dihancurkan.','bad');return;}
+
+        openModal('💥 Destroy — Pilih Kartu','Semua kartu lawan terbuka. Pilih 1 untuk dihancurkan:',
+          oppHand.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
+            cb:()=>{
+              const oi=S.players[tp].hand.findIndex(x=>x.id===c.id);
+              if(oi>=0){
+                const destroyed=S.players[tp].hand.splice(oi,1)[0];
+                destroyed.faceUp=true;S.discard.push(destroyed);
+              }
+              // Move effect card to discard
+              const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
+              if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+              log(`💥 Lv${c.lv} ${LV[c.lv].name} milik ${P_NAMES[tp]} dihancurkan!`,'good');
+              closeModal();doneEffect();
+            }
+          }))
+        );
+      }
+    }))
+  );
+}
+
+function effLock(){
+  // Can lock self or opponent
+  openModal('🔒 Lock','Pilih target untuk dikunci:',
+    [
+      {label:'🔒 Kunci kartu sendiri',cb:()=>{
+        closeModal();
+        const opts=S.players[0].hand.filter(c=>c.id!==S.sel.id&&!c.locked);
+        if(!opts.length){log('Tidak ada kartu yang bisa dikunci.','bad');return;}
+        openModal('🔒 Lock — Pilih Kartu','Pilih kartu yang ingin dikunci ke Area Terkunci:',
+          opts.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
+            cb:()=>{
+              if(c.lv<6){log('Hanya bisa kunci Level 6 atau 7!','bad');closeModal();return;}
+              const pi=S.players[0].hand.findIndex(x=>x.id===c.id);
+              if(pi>=0){
+                const locked=S.players[0].hand.splice(pi,1)[0];
+                locked.locked=true;locked.faceUp=true;
+                S.players[0].locked.push(locked);
+              }
+              // Move effect card (Lv6) to discard
+              const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
+              if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+              log(`🔒 Lv${c.lv} ${LV[c.lv].name} dikunci ke Area Terkunci!`,'good');
+              closeModal();doneEffect();
+            }
+          }))
+        );
+      }},
+      {label:'🔒 Kunci kartu lawan',cb:()=>{
+        closeModal();
+        const targets=[];
+        for(let p=1;p<4;p++){
+          if(S.players[p].shieldTurns===0&&S.players[p].hand.some(c=>c.lv>=6&&!c.locked)){
+            targets.push(p);
+          }
+        }
+        if(!targets.length){log('Tidak ada lawan dengan kartu Level 6+ yang bisa dikunci.','bad');return;}
+        openModal('🔒 Lock — Pilih Lawan','Pilih lawan:',
+          targets.map(tp=>({label:P_NAMES[tp],
+            cb:()=>{
+              closeModal();
+              const oppHigh=S.players[tp].hand.filter(c=>c.lv>=6&&!c.locked);
+              openModal('🔒 Lock — Pilih Kartu Lawan','Pilih kartu Level 6+ untuk dikunci:',
+                oppHigh.map(c=>({label:`Lv${c.lv} ${LV[c.lv].name} (${c.lv}p)`,card:c,
+                  cb:()=>{
+                    const oi=S.players[tp].hand.findIndex(x=>x.id===c.id);
+                    if(oi>=0){
+                      const locked=S.players[tp].hand.splice(oi,1)[0];
+                      locked.locked=true;locked.faceUp=true;
+                      S.players[tp].locked.push(locked);
+                    }
+                    // Move effect card (Lv6) to discard
+                    const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
+                    if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+                    log(`🔒 Lv${c.lv} ${LV[c.lv].name} milik ${P_NAMES[tp]} dikunci!`,'good');
+                    closeModal();doneEffect();
+                  }
+                }))
+              );
+            }
+          }))
+        );
+      }}
+    ]
+  );
+}
+
+function effReset(){
+  const targets=[];
+  for(let p=1;p<4;p++){
+    if(S.players[p].shieldTurns===0&&S.players[p].hand.length>0){
+      targets.push(p);
+    }
+  }
+  if(!targets.length){log('Tidak ada target untuk Reset.','bad');return;}
+
+  openModal('⬢ Reset','Pilih lawan yang ingin di-Reset:',
+    targets.map(tp=>({label:P_NAMES[tp],
+      cb:()=>{
+        // Return all hand cards to pool (except locked)
+        const toReturn=S.players[tp].hand.filter(c=>!c.locked);
+        const lockedInHand=S.players[tp].hand.filter(c=>c.locked);
+        toReturn.forEach(c=>{c.faceUp=false;c.locked=false;S.pool.push(c);});
+        S.pool=shuffle(S.pool);
+
+        // Draw new cards
+        const newHand=[...lockedInHand];
+        const drawCount=Math.min(toReturn.length,S.pool.length);
+        for(let i=0;i<drawCount;i++){
+          const nc=S.pool.pop();nc.faceUp=true;newHand.push(nc);
+        }
+        S.players[tp].hand=newHand;
+
+        // Move effect card (Lv7) to discard
+        const effIdx=S.players[0].hand.findIndex(x=>x.id===S.sel.id);
+        if(effIdx>=0){const effCard=S.players[0].hand.splice(effIdx,1)[0];effCard.faceUp=true;S.discard.push(effCard);}
+
+        log(`⬢ Reset! ${toReturn.length} kartu ${P_NAMES[tp]} dikocok ulang.`,'good');
+        closeModal();doneEffect();
+      }
+    }))
+  );
+}
+
+function doneEffect(){S.sel=null;endTurn();}
+
+function endTurn(){
+  // Decrement shield
+  for(let p=0;p<4;p++){
+    if(S.players[p].shieldTurns>0)S.players[p].shieldTurns--;
+  }
+
+  S.phase='draw';
+  S.turn=(S.turn+1)%4;
+  S.sel=null;
+  S.round++;
+
+  // Check skipped
+  if(S.players[S.turn].skipped){
+    S.players[S.turn].skipped=false;
+    log(`⏭ ${P_NAMES[S.turn]} kehilangan giliran (Skip).`,S.turn===0?'bad':'info');
+    S.turn=(S.turn+1)%4;
+  }
+
+  render();
+
+  if(S.turn!==0&&!S.gameOver){
+    setTimeout(aiTurn,1000);
+  }
+}
+
+// ══════════════════════════════
+// AI TURN
+// ══════════════════════════════
+function aiTurn(){
+  if(S.gameOver)return;
+  const p=S.turn;
+
+  // Check skipped
+  if(S.players[p].skipped){
+    S.players[p].skipped=false;
+    log(`⏭ ${P_NAMES[p]} kehilangan giliran (Skip).`,'info');
+    S.turn=(S.turn+1)%4;
+    render();
+    if(S.turn!==0)setTimeout(aiTurn,800);
+    return;
+  }
+
+  // Draw
+  if(S.pool.length===0){endGame();return;}
+  const d=S.pool.pop();S.players[p].hand.push(d);
+  log(`${P_NAMES[p]} mengambil kartu.`);
+  if(S.pool.length===0){log('⚠ Pool habis!','bad');render();setTimeout(endGame,500);return;}
+
+  setTimeout(()=>aiEffect(p),700);
+}
+
+function aiEffect(p){
+  const player=S.players[p];
+  const effCards=player.hand.filter(c=>LV[c.lv].eff&&!c.locked);
+  if(!effCards.length){log(`${P_NAMES[p]} pass efek.`,'info');aiDone(p);return;}
+
+  const myScore=bestScore(player.hand,player.locked);
+  const hasShield=player.hand.some(c=>c.lv===3&&!c.locked);
+  const hasLv6=player.hand.some(c=>c.lv===6&&!c.locked);
+  const hasLv7=player.hand.some(c=>c.lv===7&&!c.locked);
+  const hasLv5=player.hand.some(c=>c.lv===5&&!c.locked);
+  const hasLv4=player.hand.some(c=>c.lv===4&&!c.locked);
+  const hasLv2=player.hand.some(c=>c.lv===2&&!c.locked);
+
+  // Find strongest opponent
+  let strongestOpp=-1,strongestScore=-1;
+  for(let i=0;i<4;i++){
+    if(i===p)continue;
+    const s=bestScore(S.players[i].hand,S.players[i].locked);
+    if(s>strongestScore){strongestScore=s;strongestOpp=i;}
+  }
+
+  const rand=Math.random();
+
+  // AI Strategy based on playbook
+
+  // 1. Shield if have Lv7 and opponent has Lv5/7
+  if(hasShield&&hasLv7){
+    let threat=false;
+    for(let i=0;i<4;i++){
+      if(i===p)continue;
+      if(S.players[i].hand.some(c=>(c.lv===5||c.lv===7)&&!c.locked)&&S.players[i].shieldTurns===0){
+        threat=true;break;
+      }
+    }
+    if(threat&&rand>.3){
+      const shieldCard=player.hand.find(c=>c.lv===3&&!c.locked);
+      const idx=player.hand.findIndex(c=>c.id===shieldCard.id);
+      player.hand.splice(idx,1);shieldCard.faceUp=true;S.discard.push(shieldCard);
+      player.shieldTurns=1;
+      log(`🛡 ${P_NAMES[p]} mengaktifkan Shield.`,'info');
+      aiDone(p);return;
+    }
+  }
+
+  // 2. Lock Lv7 with Lv6
+  if(hasLv6&&hasLv7&&rand>.2){
+    const lv7=player.hand.find(c=>c.lv===7&&!c.locked);
+    const lv6=player.hand.find(c=>c.lv===6&&!c.locked);
+    if(lv7&&lv6){
+      const i7=player.hand.findIndex(c=>c.id===lv7.id);
+      player.hand.splice(i7,1);lv7.locked=true;lv7.faceUp=true;player.locked.push(lv7);
+      const i6=player.hand.findIndex(c=>c.id===lv6.id);
+      player.hand.splice(i6,1);lv6.faceUp=true;S.discard.push(lv6);
+      log(`🔒 ${P_NAMES[p]} mengunci Lv7 dengan Lv6!`,'bad');
+      aiDone(p);return;
+    }
+  }
+
+  // 3. Lock Lv6 with Lv6 (fallback)
+  if(hasLv6){
+    const lv6s=player.hand.filter(c=>c.lv===6&&!c.locked);
+    if(lv6s.length>=2&&rand>.3){
+      const toLock=lv6s[0];
+      const locker=lv6s[1];
+      const il=player.hand.findIndex(c=>c.id===toLock.id);
+      player.hand.splice(il,1);toLock.locked=true;toLock.faceUp=true;player.locked.push(toLock);
+      const ik=player.hand.findIndex(c=>c.id===locker.id);
+      player.hand.splice(ik,1);locker.faceUp=true;S.discard.push(locker);
+      log(`🔒 ${P_NAMES[p]} mengunci Lv6 dengan Lv6.`,'bad');
+      aiDone(p);return;
+    }
+  }
+
+  // 4. Destroy opponent's Lv7
+  if(hasLv5&&strongestOpp>=0&&rand>.25){
+    const opp=S.players[strongestOpp];
+    if(opp.shieldTurns===0){
+      const oppLv7=opp.hand.find(c=>c.lv===7&&!c.locked);
+      if(oppLv7){
+        const oi=opp.hand.findIndex(c=>c.id===oppLv7.id);
+        opp.hand.splice(oi,1);oppLv7.faceUp=true;S.discard.push(oppLv7);
+        const fi=player.hand.findIndex(c=>c.lv===5&&!c.locked);
+        const effCard=player.hand.splice(fi,1)[0];effCard.faceUp=true;S.discard.push(effCard);
+        log(`💥 ${P_NAMES[p]} menghancurkan Lv7 milik ${P_NAMES[strongestOpp]}!`,'bad');
+        aiDone(p);return;
+      }
+    }
+  }
+
+  // 5. Reset strongest opponent (late game, pool < 15)
+  const hasReset=player.hand.find(c=>c.lv===7&&!c.locked);
+  if(hasReset&&S.pool.length<15&&strongestOpp>=0&&rand>.35){
+    const opp=S.players[strongestOpp];
+    if(opp.shieldTurns===0&&opp.hand.length>0){
+      const toReturn=opp.hand.filter(c=>!c.locked);
+      const lockedInHand=opp.hand.filter(c=>c.locked);
+      toReturn.forEach(c=>{c.faceUp=false;c.locked=false;S.pool.push(c);});
+      S.pool=shuffle(S.pool);
+      const newHand=[...lockedInHand];
+      const drawCount=Math.min(toReturn.length,S.pool.length);
+      for(let i=0;i<drawCount;i++){const nc=S.pool.pop();nc.faceUp=true;newHand.push(nc);}
+      opp.hand=newHand;
+      const fi=player.hand.findIndex(c=>c.id===hasReset.id);
+      player.hand.splice(fi,1);hasReset.faceUp=true;S.discard.push(hasReset);
+      log(`⬢ ${P_NAMES[p]} Reset ${P_NAMES[strongestOpp]}!`,'bad');
+      aiDone(p);return;
+    }
+  }
+
+  // 6. Skip strongest opponent if they have Lv6/7
+  if(hasLv4&&strongestOpp>=0&&rand>.4){
+    const opp=S.players[strongestOpp];
+    if(opp.shieldTurns===0&&opp.hand.some(c=>(c.lv===6||c.lv===7)&&!c.locked)){
+      opp.skipped=true;
+      const fi=player.hand.findIndex(c=>c.lv===4&&!c.locked);
+      const effCard=player.hand.splice(fi,1)[0];effCard.faceUp=true;S.discard.push(effCard);
+      log(`⏭ ${P_NAMES[p]} Skip ${P_NAMES[strongestOpp]}!`,'bad');
+      aiDone(p);return;
+    }
+  }
+
+  // 7. Swap with strongest opponent
+  if(hasLv2&&strongestOpp>=0&&rand>.45){
+    const opp=S.players[strongestOpp];
+    if(opp.shieldTurns===0&&opp.hand.length>0){
+      const myWorst=player.hand.filter(c=>!c.locked&&c.lv!==2).sort((a,b)=>a.lv-b.lv)[0];
+      const oppCards=opp.hand.filter(c=>!c.locked);
+      if(myWorst&&oppCards.length){
+        const oppCard=oppCards[Math.floor(Math.random()*oppCards.length)];
+        const mi=player.hand.findIndex(c=>c.id===myWorst.id);
+        const oi=opp.hand.findIndex(c=>c.id===oppCard.id);
+        player.hand[mi]=oppCard;oppCard.faceUp=true;
+        opp.hand[oi]=myWorst;myWorst.faceUp=false;
+        const fi=player.hand.findIndex(c=>c.lv===2&&!c.locked);
+        const effCard=player.hand.splice(fi,1)[0];effCard.faceUp=true;S.discard.push(effCard);
+        log(`${P_NAMES[p]} Swap dengan ${P_NAMES[strongestOpp]}.`,'info');
+        aiDone(p);return;
+      }
+    }
+  }
+
+  log(`${P_NAMES[p]} pass efek.`,'info');
+  aiDone(p);
+}
+
+function aiDone(p){
+  // Decrement shields
+  for(let i=0;i<4;i++){
+    if(S.players[i].shieldTurns>0)S.players[i].shieldTurns--;
+  }
+
+  S.phase='draw';
+  S.turn=(S.turn+1)%4;
+  S.sel=null;
+
+  // Check skipped for next player
+  if(S.players[S.turn].skipped){
+    S.players[S.turn].skipped=false;
+    log(`⏭ ${P_NAMES[S.turn]} kehilangan giliran (Skip).`,S.turn===0?'bad':'info');
+    S.turn=(S.turn+1)%4;
+  }
+
+  render();
+
+  if(S.turn!==0&&!S.gameOver){
+    setTimeout(()=>aiTurn(),800);
+  }
+}
+
+// ══════════════════════════════
+// END GAME
+// ══════════════════════════════
+function endGame(){
+  S.gameOver=true;
+  const scores=S.players.map((pl,i)=>({pid:i,score:bestScore(pl.hand,pl.locked),name:P_NAMES[i],hand:pl.hand,locked:pl.locked}));
+  scores.sort((a,b)=>b.score-a.score);
+
+  const winner=scores[0];
+  const isTie=scores.length>1&&scores[1].score===winner.score;
+
+  initAudio();
+  if(winner.pid===0&&!isTie)playSound('win');
+  else if(!isTie)playSound('lose');
+  if(winner.pid===0&&!isTie)spawnWinParticles();
+
+  document.getElementById('r-crown').textContent=isTie?'🤝':winner.pid===0?'👑':'🏆';
+  document.getElementById('r-crown').className=winner.pid===0&&!isTie?'crown-anim':'';
+  document.getElementById('r-title').textContent=isTie?'Seri!':winner.pid===0?'Kamu Menang!':`${winner.name} Menang!`;
+  document.getElementById('r-detail').textContent=isTie?'Semua pemain memiliki skor yang sama!':`Skor tertinggi: ${winner.score} poin`;
+
+  const rp=document.getElementById('r-players');rp.innerHTML='';
+  scores.forEach((s,idx)=>{
+    const bc=bestCards(s.hand,s.locked);
+    const div=document.createElement('div');
+    div.className='r-player'+(idx===0?' win':'');
+    div.innerHTML=`<h3>${s.name}</h3><div class="r-score">${s.score}</div>
+      ${s.locked.length?`<div class="r-locked">🔒 ${s.locked.length} kartu terkunci</div>`:''}
+      <div class="r-pips">
+        ${bc.map(c=>`<div class="r-pip" style="background:${LV[c.lv].col}18;border:1px solid ${LV[c.lv].col}50;color:${LV[c.lv].col}">Lv${c.lv}·${c.lv}p</div>`).join('')}
+      </div>`;
+    rp.appendChild(div);
+  });
+
+  show('result-screen');
+}
+
+function spawnWinParticles(){
+  for(let i=0;i<25;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');p.className='win-particle';
+      p.style.left=(25+Math.random()*50)+'%';p.style.top=(25+Math.random()*50)+'%';
+      p.style.background=['#c9a84c','#e8c96a','#3ecf8e','#4a9eff','#9966ff'][Math.floor(Math.random()*5)];
+      document.body.appendChild(p);setTimeout(()=>p.remove(),900);
+    },i*45);
+  }
+}
+
+// ══════════════════════════════
+// LOG & MODAL
+// ══════════════════════════════
+function log(msg,t=''){
+  const el=document.getElementById('glog');
+  const d=document.createElement('div');
+  d.className='le'+(t?' '+t:'');d.textContent=msg;
+  el.prepend(d);
+  while(el.children.length>25)el.removeChild(el.lastChild);
+}
+function clearLog(){document.getElementById('glog').innerHTML='';}
+
+function openModal(title,body,btns){
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').textContent=body;
+  document.getElementById('m-cards').innerHTML='';
+  const be=document.getElementById('m-btns');be.innerHTML='';
+  btns.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='btn-a gold';btn.textContent=b.label;btn.onclick=b.cb;
+    if(b.card){
+      const mini=document.createElement('div');mini.style.cssText='display:flex;align-items:center;gap:.4rem;';
+      const cw=document.createElement('div');cw.style.cssText='width:36px;height:50px;flex-shrink:0;border-radius:3px;overflow:hidden;';
+      const face=buildProtoCard(b.card.lv);face.style.cssText='position:static;border-radius:3px;width:36px;height:50px;';
+      cw.appendChild(face);mini.appendChild(cw);
+      const lbl=document.createElement('span');lbl.textContent=b.label;lbl.style.cssText='font-family:Cinzel,serif;font-size:.7rem;';
+      mini.appendChild(lbl);btn.textContent='';btn.appendChild(mini);
+    }
+    be.appendChild(btn);
+  });
+  document.getElementById('ovl').classList.add('open');
+}
+function closeModal(){document.getElementById('ovl').classList.remove('open');}
+</script>
+</body>
+</html>
